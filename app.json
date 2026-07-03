@@ -2,7 +2,7 @@
   "expo": {
     "name": "BusinessWallet",
     "slug": "BusinessWallet",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon11.png",
     "scheme": "businesswallet",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.shahin.businesswallet",
-      "versionCode": 1,
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#e6f4fe00",
         "foregroundImage": "./assets/images/icon11.png"

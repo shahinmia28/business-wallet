@@ -650,3 +650,11 @@ export const updateCustomerTransaction = async ({
 
 export const deleteCustomerTransaction = async (id) =>
   await db.runAsync(`DELETE FROM customer_transactions WHERE id=?`, [id]);
+
+/* ===================== BACKUP HELPERS ===================== */
+
+export const getAllSupplierTransactionsForBackup = async () =>
+  await db.getAllAsync(`SELECT * FROM supplier_transactions ORDER BY id;`);
+
+export const getAllCustomerTransactionsForBackup = async () =>
+  await db.getAllAsync(`SELECT * FROM customer_transactions ORDER BY id;`);

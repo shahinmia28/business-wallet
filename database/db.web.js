@@ -83,4 +83,8 @@ export const insertCustomerTransaction = async () => null;
 export const updateCustomerTransaction = async () => null;
 export const deleteCustomerTransaction = async () => null;
 
+/* ===== BACKUP HELPERS ===== */
+export const getAllSupplierTransactionsForBackup = async () => [];
+export const getAllCustomerTransactionsForBackup = async () => [];
+
 export default null;

@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -56,20 +55,27 @@ export default function AddCustomer() {
         style={styles.wrapper}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Header */}
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backBtn}
-          >
-            <Ionicons name='arrow-back' size={24} color='#11181C' />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>নতুন কাস্টমার</Text>
-          <View style={{ width: 24 }} />
-        </View>
-
         {/* Form Card */}
         <View style={styles.card}>
+          <View style={styles.headerRow}>
+            <Text style={styles.headerTitle}>New Customer</Text>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.cancelBtn}
+            >
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+              onPress={handleSave}
+              disabled={saving}
+            >
+              <Text style={styles.saveBtnText}>
+                {saving ? 'Saving...' : 'Save'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <Text style={styles.label}>নাম *</Text>
           <TextInput
             style={styles.input}
@@ -105,18 +111,6 @@ export default function AddCustomer() {
             numberOfLines={4}
           />
         </View>
-
-        {/* Save Button */}
-        <TouchableOpacity
-          style={[styles.saveButton, saving && { opacity: 0.6 }]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          <Ionicons name='checkmark-circle' size={22} color='#fff' />
-          <Text style={styles.saveButtonText}>
-            {saving ? 'সেভ হচ্ছে...' : 'সংরক্ষণ করুন'}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -127,16 +121,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f4f6f8',
     paddingHorizontal: 16,
+    marginTop: 70,
   },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 50,
-    marginBottom: 20,
-  },
-  backBtn: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#11181C' },
+
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 20,
@@ -162,20 +149,22 @@ const styles = StyleSheet.create({
     minHeight: 90,
     textAlignVertical: 'top',
   },
-  saveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#008080ac',
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginTop: 20,
-    gap: 8,
-    boxShadow: '0 6px 30px #00000022',
-  },
-  saveButtonText: {
-    color: '#fff',
+
+  headerRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  headerTitle: {
+    flex: 3,
+    fontSize: 17,
     fontWeight: 'bold',
-    fontSize: 16,
+    color: '#575757',
   },
+  cancelBtn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  cancelBtnText: { color: '#dd0000', fontWeight: '400', fontSize: 15 },
+  saveBtn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  saveBtnText: { color: '#008080ff', fontWeight: '400', fontSize: 15 },
 });

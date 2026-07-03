@@ -64,6 +64,10 @@ export const {
   insertCustomerTransaction,
   updateCustomerTransaction,
   deleteCustomerTransaction,
+
+  // Backup helpers
+  getAllSupplierTransactionsForBackup,
+  getAllCustomerTransactionsForBackup,
 } = dbModule;
 
 export default dbModule.default;

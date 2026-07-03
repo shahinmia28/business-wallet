@@ -51,7 +51,7 @@ export default function SideNav({ visible, onClose }) {
   const go = (path, label) => {
     router.push(path);
     setSelected(label);
-    onClose(); // auto close
+    onClose();
   };
 
   if (!visible) return null;
@@ -107,6 +107,28 @@ export default function SideNav({ visible, onClose }) {
           selected={selected === 'Today'}
         />
         <MenuItem
+          icon='account-group'
+          label='Supplier'
+          onPress={() => go('/supplier', 'Supplier')}
+          selected={selected === 'Supplier'}
+        />
+        <MenuItem
+          icon='account-heart'
+          label='Customer'
+          onPress={() => go('/customer', 'Customer')}
+          selected={selected === 'Customer'}
+        />
+        <MenuItem
+          icon='note-text'
+          label='Notes'
+          onPress={() => go('/notes', 'Notes')}
+          selected={selected === 'Notes'}
+        />
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        <MenuItem
           icon='information'
           label='About Me'
           onPress={() => go('/about', 'About Me')}
@@ -124,27 +146,46 @@ export default function SideNav({ visible, onClose }) {
           onPress={() => go('/privacy', 'Privacy Policy')}
           selected={selected === 'Privacy Policy'}
         />
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Backup — আলাদা রঙে */}
+        <MenuItem
+          icon='cloud-upload'
+          label='Backup & Restore'
+          onPress={() => go('/backup', 'Backup & Restore')}
+          selected={selected === 'Backup & Restore'}
+          accent
+        />
       </Animated.View>
     </View>
   );
 }
 
-function MenuItem({ icon, label, onPress, selected }) {
+function MenuItem({ icon, label, onPress, selected, accent }) {
+  const color = accent ? '#6366f1' : selected ? '#008080cc' : '#595959';
+
+  const bg = accent
+    ? selected
+      ? '#ede9fe'
+      : '#f5f3ff'
+    : selected
+      ? '#00808013'
+      : 'transparent';
+
   return (
     <TouchableOpacity
-      style={[styles.item, selected ? { backgroundColor: '#00808013' } : null]}
+      style={[styles.item, { backgroundColor: bg }]}
       onPress={onPress}
       activeOpacity={0.6}
     >
-      <MaterialCommunityIcons
-        name={icon}
-        size={22}
-        color={selected ? '#008080cc' : '#595959'}
-      />
+      <MaterialCommunityIcons name={icon} size={22} color={color} />
       <Text
         style={[
           styles.itemText,
-          selected ? { color: '#008080cc', fontWeight: '600' } : null,
+          { color },
+          (selected || accent) && { fontWeight: '600' },
         ]}
       >
         {label}
@@ -193,7 +234,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    flexShrink: 1,
   },
   item: {
     flexDirection: 'row',
@@ -203,10 +243,16 @@ const styles = StyleSheet.create({
     gap: 12,
     borderRadius: 8,
     marginHorizontal: 8,
-    marginVertical: 4,
+    marginVertical: 2,
   },
   itemText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#595959',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    marginHorizontal: 16,
+    marginVertical: 6,
   },
 });

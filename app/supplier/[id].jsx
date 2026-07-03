@@ -251,6 +251,9 @@ export default function SupplierDetail() {
                 </View>
               </Pressable>
             ) : null}
+            {supplier.name ? (
+              <InfoRow icon='person-outline' text={supplier.name} />
+            ) : null}
             {supplier.address ? (
               <InfoRow icon='location-outline' text={supplier.address} />
             ) : null}
@@ -506,12 +509,25 @@ function TxModal({ visible, supplierId, editData, onClose, onSaved }) {
           {/* Handle */}
           <View style={styles.modalHandle} />
 
-          <Text style={styles.modalTitle}>
-            {isEdit ? 'লেনদেন সম্পাদনা' : 'নতুন লেনদেন'}
-          </Text>
-
           <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.modalLabel}>তারিখ</Text>
+            {/* Buttons */}
+            <View style={styles.modalBtns}>
+              <Text style={styles.modalTitle}>
+                {isEdit ? 'Edit Transaction' : 'New Transaction'}
+              </Text>
+              <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+                onPress={handleSave}
+                disabled={saving}
+              >
+                <Text style={styles.saveBtnText}>
+                  {saving ? 'Saving...' : 'Save'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity
               style={styles.modalInput}
               onPress={() => setShowPicker(true)}
@@ -569,22 +585,6 @@ function TxModal({ visible, supplierId, editData, onClose, onSaved }) {
               placeholder='বিবরণ (ঐচ্ছিক)'
               multiline
             />
-
-            {/* Buttons */}
-            <View style={styles.modalBtns}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-                <Text style={styles.cancelBtnText}>বাতিল</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.saveBtn, saving && { opacity: 0.6 }]}
-                onPress={handleSave}
-                disabled={saving}
-              >
-                <Text style={styles.saveBtnText}>
-                  {saving ? 'সেভ হচ্ছে...' : 'সংরক্ষণ'}
-                </Text>
-              </TouchableOpacity>
-            </View>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -650,9 +650,21 @@ function EditSupplierModal({ visible, supplier, onClose, onSaved }) {
           onPress={onClose}
         />
         <View style={styles.modalSheet}>
-          <View style={styles.modalHandle} />
-          <Text style={styles.modalTitle}>সাপ্লায়ার সম্পাদনা</Text>
-
+          <View style={styles.modalBtns}>
+            <Text style={styles.modalTitle}>Edit Supplier</Text>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+              onPress={handleSave}
+              disabled={saving}
+            >
+              <Text style={styles.saveBtnText}>
+                {saving ? 'Saving...' : 'Save'}
+              </Text>
+            </TouchableOpacity>
+          </View>
           <Text style={styles.modalLabel}>নাম *</Text>
           <TextInput
             style={styles.modalInput}
@@ -689,21 +701,6 @@ function EditSupplierModal({ visible, supplier, onClose, onSaved }) {
             placeholder='নোট (ঐচ্ছিক)'
             multiline
           />
-
-          <View style={styles.modalBtns}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-              <Text style={styles.cancelBtnText}>বাতিল</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.saveBtn, saving && { opacity: 0.6 }]}
-              onPress={handleSave}
-              disabled={saving}
-            >
-              <Text style={styles.saveBtnText}>
-                {saving ? 'সেভ হচ্ছে...' : 'সংরক্ষণ'}
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -859,30 +856,17 @@ const styles = StyleSheet.create({
   },
 
   /* Modal */
-  modalOverlay: { flex: 1, justifyContent: 'flex-end' },
+  modalOverlay: { flex: 1, justifyContent: 'flex-start' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: '#00000055' },
   modalSheet: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    margin: 10,
+    borderRadius: 20,
     padding: 20,
     paddingBottom: 36,
     maxHeight: '90%',
   },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#ddd',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#11181C',
-    marginBottom: 14,
-  },
+
   modalLabel: {
     fontSize: 13,
     fontWeight: '600',
@@ -898,21 +882,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#11181C',
   },
-  modalBtns: { flexDirection: 'row', gap: 10, marginTop: 20 },
+  modalBtns: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  modalTitle: {
+    flex: 3,
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#575757',
+  },
   cancelBtn: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 14,
     alignItems: 'center',
-    backgroundColor: '#f4f6f8',
   },
-  cancelBtnText: { color: '#555', fontWeight: '600', fontSize: 15 },
+  cancelBtnText: { color: '#dd0000', fontWeight: '400', fontSize: 15 },
   saveBtn: {
-    flex: 2,
-    paddingVertical: 14,
-    borderRadius: 14,
+    flex: 1,
     alignItems: 'center',
-    backgroundColor: '#008080ac',
   },
-  saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  saveBtnText: { color: '#008080ff', fontWeight: '400', fontSize: 15 },
 });

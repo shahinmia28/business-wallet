@@ -194,7 +194,7 @@ export default function All() {
             style={[styles.deleteAllBtn, backingUp && { opacity: 0.5 }]}
           >
             <Text style={{ color: '#26acdc', fontWeight: 'bold' }}>
-              {backingUp ? '...' : 'Backup'}
+              {backingUp ? '...' : 'PDF Share'}
             </Text>
           </TouchableOpacity>
         </View>
