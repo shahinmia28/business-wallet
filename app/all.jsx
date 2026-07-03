@@ -17,9 +17,7 @@ import SummaryList from '../components/SummaryList';
 import { useData } from '../context/DataContext';
 import formatBDDate from '../utils/BDDateTime';
 
-import * as SQLite from 'expo-sqlite';
-
-const db = SQLite.openDatabaseSync('expense.db');
+import { generateBackupPDF, shareBackup } from '../utils/generateBackup';
 
 export default function All() {
   const { expenses, incomes, deleteExpense, deleteIncome } = useData();
@@ -33,8 +31,8 @@ export default function All() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [backingUp, setBackingUp] = useState(false);
 
-  // 🔹 combine data
   const combinedData = useMemo(() => {
     return [
       ...incomes.map((i) => ({ ...i, type: 'income' })),
@@ -42,7 +40,6 @@ export default function All() {
     ].sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [expenses, incomes]);
 
-  // 🔹 filter
   const filteredData = useMemo(() => {
     return combinedData.filter((item) => {
       const d = new Date(item.date);
@@ -56,8 +53,6 @@ export default function All() {
       return true;
     });
   }, [mode, combinedData, selectedDate]);
-
-  // 🔹 summary
 
   const totalSell = filteredData
     .filter((i) => i.type === 'income')
@@ -73,7 +68,6 @@ export default function All() {
 
   const balance = totalIncome - totalExpense;
 
-  // 🔹 delete single
   const handleDeleteSingle = async () => {
     if (!selectedItem) return;
     selectedItem.type === 'income'
@@ -82,7 +76,6 @@ export default function All() {
     setShowOptionModal(false);
   };
 
-  // 🔥 delete all confirmed
   const handleDeleteAllConfirmed = async () => {
     for (const item of filteredData) {
       item.type === 'income'
@@ -91,8 +84,18 @@ export default function All() {
     }
     setShowConfirmDelete(false);
   };
-  const handleBackup = () => {
-    alert('Backup functionality is not implemented yet.');
+
+  const handleBackup = async () => {
+    if (backingUp) return;
+    setBackingUp(true);
+    try {
+      const uri = await generateBackupPDF({ expenses, incomes });
+      await shareBackup(uri);
+    } catch (e) {
+      alert('Backup ব্যর্থ: ' + e.message);
+    } finally {
+      setBackingUp(false);
+    }
   };
 
   const renderItem = ({ item }) => (
@@ -115,7 +118,7 @@ export default function All() {
             item.type === 'income' ? styles.incomeText : styles.expenseText,
           ]}
         >
-          {item.type === 'income' ? `৳${item.selAmount}` : 'ব্যয়'}
+          {item.type === 'income' ? `৳${item.selAmount}` : 'ব্যয়'}
         </Text>
         <Text style={styles.itemText}>{item.reason}</Text>
         <Text
@@ -130,11 +133,10 @@ export default function All() {
     </>
   );
 
-  // Sticky Header Component
   const StickyHeader = () => {
     const monthNames = [
-      'জানুয়ারি',
-      'ফেব্রুয়ারি',
+      'জানুয়ারি',
+      'ফেব্রুয়ারি',
       'মার্চ',
       'এপ্রিল',
       'মে',
@@ -151,16 +153,13 @@ export default function All() {
       let dateText = '';
       if (mode === 'today') dateText = formatBDDate(selectedDate);
       else if (mode === 'month')
-        dateText = `${
-          monthNames[selectedDate.getMonth()]
-        } ${selectedDate.getFullYear()}`;
+        dateText = `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
       else dateText = 'সব';
       return `${dateText}`;
     };
 
     return (
       <View style={styles.stickyHeader}>
-        {/* summary */}
         <View style={styles.summaryContainer}>
           <View style={styles.titleBox}>
             <Text style={styles.summaryTitle}>{getHeaderTitle()}</Text>
@@ -173,7 +172,6 @@ export default function All() {
             />
           </View>
         </View>
-        {/* date picker and delete and backup*/}
         <View style={styles.dateAndDeleteBox}>
           <TouchableOpacity
             style={styles.dateBtn}
@@ -191,14 +189,15 @@ export default function All() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleBackup()}
-            style={styles.deleteAllBtn}
+            onPress={handleBackup}
+            disabled={backingUp}
+            style={[styles.deleteAllBtn, backingUp && { opacity: 0.5 }]}
           >
-            <Text style={{ color: '#26acdc', fontWeight: 'bold' }}>Backup</Text>
+            <Text style={{ color: '#26acdc', fontWeight: 'bold' }}>
+              {backingUp ? '...' : 'Backup'}
+            </Text>
           </TouchableOpacity>
         </View>
-
-        {/* mode change */}
         <View style={styles.modeRow}>
           {['today', 'month', 'all'].map((m) => (
             <TouchableOpacity
@@ -229,13 +228,9 @@ export default function All() {
         stickyHeaderIndices={[0]}
         style={{ backgroundColor: '#ffffff' }}
       />
-
-      {/* Floating Home Button */}
       <TouchableOpacity style={styles.homeBtn} onPress={() => router.push('/')}>
         <FontAwesome name='home' size={22} color='white' />
       </TouchableOpacity>
-
-      {/* Edit/Delete Modals */}
       {showOptionModal && selectedItem && (
         <EditDeleteModal
           item={selectedItem}
@@ -247,12 +242,9 @@ export default function All() {
           onDelete={handleDeleteSingle}
         />
       )}
-
       {showEditForm && selectedItem && (
         <EditForm item={selectedItem} onClose={() => setShowEditForm(false)} />
       )}
-
-      {/* Date Picker */}
       {showPicker && (
         <DateTimePicker
           value={selectedDate}
@@ -264,8 +256,6 @@ export default function All() {
           }}
         />
       )}
-
-      {/* Confirm Delete All */}
       <ConfirmDeleteModal
         visible={showConfirmDelete}
         onClose={() => setShowConfirmDelete(false)}
@@ -298,9 +288,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#109b8b',
   },
-  summaryBoxes: {
-    flex: 2,
-  },
+  summaryBoxes: { flex: 2 },
   dateAndDeleteBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -308,7 +296,6 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     gap: 8,
   },
-
   dateBtn: {
     flex: 1,
     flexDirection: 'row',
@@ -336,11 +323,7 @@ const styles = StyleSheet.create({
   },
   modeActive: { backgroundColor: '#22c55e' },
   modeText: { fontWeight: 'bold', color: '#464646' },
-  deleteAllBtnContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-
+  deleteAllBtnContainer: { flexDirection: 'row', justifyContent: 'flex-end' },
   itemCard: {
     flexDirection: 'row',
     padding: 12,

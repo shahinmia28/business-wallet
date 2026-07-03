@@ -1,5 +1,5 @@
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar'; // 🆕 ADD
+import { Stack, usePathname } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -9,9 +9,27 @@ import SideNav from '../components/SideNav';
 import { DataProvider } from '../context/DataContext';
 import { useSQLite } from '../hooks/useSQLite';
 
+// শুধু এই পেজগুলোতে global Header দেখাবে
+const HEADER_PAGES = [
+  '/',
+  '/index',
+  '/all',
+  '/notes',
+  '/today',
+  '/report',
+  '/expenseForm',
+  '/incomeForm',
+  '/about',
+  '/contact',
+  '/privacy',
+];
+
 export default function Layout() {
   const dbReady = useSQLite();
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const showHeader = HEADER_PAGES.includes(pathname);
 
   if (!dbReady) {
     return (
@@ -23,16 +41,13 @@ export default function Layout() {
 
   return (
     <DataProvider>
-      {/* 🔥 STATUS BAR FIX */}
       <StatusBar style='dark' backgroundColor='#ffffff' />
 
-      {/* Header */}
-      <Header onMenu={() => setMenuOpen(true)} />
+      {/* শুধু home পেজে global Header */}
+      {showHeader && <Header onMenu={() => setMenuOpen(true)} />}
 
-      {/* Pages */}
       <Stack screenOptions={{ headerShown: false }} />
 
-      {/* Global SideNav */}
       <SideNav visible={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <Toast />

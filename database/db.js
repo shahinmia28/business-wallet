@@ -10,14 +10,60 @@ if (Platform.OS === 'web') {
 
 export const {
   initDB,
+
+  // Expenses
   getAllExpenses,
   insertExpense,
   deleteExpenseById,
   updateExpense,
+
+  // Incomes
   getAllIncomes,
   insertIncome,
   deleteIncomeById,
   updateIncome,
+
+  // Suppliers
+  getAllSuppliers,
+  getAllSuppliersIncludingInactive,
+  insertSupplier,
+  updateSupplier,
+  deleteSupplier,
+  deactivateSupplier,
+  activateSupplier,
+  getSupplierById,
+  getSupplierByPhone,
+  getSupplierSummary,
+
+  // Supplier Transactions
+  getSupplierTransactions,
+  insertSupplierTransaction,
+  updateSupplierTransaction,
+  deleteSupplierTransaction,
+
+  // Notes
+  getAllNotes,
+  insertNote,
+  updateNote,
+  deleteNoteById,
+
+  // Customers
+  getAllCustomers,
+  getAllCustomersIncludingInactive,
+  insertCustomer,
+  updateCustomer,
+  deleteCustomer,
+  deactivateCustomer,
+  activateCustomer,
+  getCustomerById,
+  getCustomerByPhone,
+  getCustomerSummary,
+
+  // Customer Transactions
+  getCustomerTransactions,
+  insertCustomerTransaction,
+  updateCustomerTransaction,
+  deleteCustomerTransaction,
 } = dbModule;
 
 export default dbModule.default;

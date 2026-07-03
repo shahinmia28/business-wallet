@@ -1,4 +1,4 @@
-import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -17,55 +17,74 @@ export default function NotesPage() {
   const [selectedNote, setSelectedNote] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
 
+  // pinned আগে, তারপর বাকিগুলো — createdAt এর উল্টো ক্রমে
+  const sorted = [...notes].sort((a, b) => {
+    if (b.pinned !== a.pinned) return b.pinned - a.pinned;
+    return (
+      new Date(b.updatedAt || b.createdAt) -
+      new Date(a.updatedAt || a.createdAt)
+    );
+  });
+
+  const openNew = () => {
+    setSelectedNote(null);
+    setShowEditor(true);
+  };
+  const openNote = (note) => {
+    setSelectedNote(note);
+    setShowEditor(true);
+  };
+
+  const renderNote = ({ item }) => {
+    const date = dayjs(item.updatedAt || item.createdAt).format('DD MMM YYYY');
+    return (
+      <TouchableOpacity
+        style={styles.noteCard}
+        activeOpacity={0.75}
+        onPress={() => openNote(item)}
+      >
+        <View style={styles.noteCardRow}>
+          <Text style={styles.noteTitle} numberOfLines={1}>
+            {item.title || 'শিরোনামহীন'}
+          </Text>
+          {item.pinned ? (
+            <Ionicons name='bookmark' size={15} color='#f59e0b' />
+          ) : null}
+        </View>
+        <Text style={styles.noteDate}>{date}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <View style={styles.container}>
-      {/* ===== Header ===== */}
+    <View style={styles.wrapper}>
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => {
-            setSelectedNote(null);
-            setShowEditor(true);
-          }}
-        >
-          <FontAwesome name='plus' size={22} color='#333' />
+        <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
+          <Ionicons name='arrow-back' size={22} color='#374151' />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>নোটস</Text>
+        <TouchableOpacity onPress={openNew} style={styles.addBtn}>
+          <Ionicons name='add' size={24} color='#fff' />
         </TouchableOpacity>
       </View>
 
-      {/* ===== Home Button ===== */}
-      <TouchableOpacity
-        style={styles.homeButton}
-        onPress={() => router.push('/')}
-      >
-        <FontAwesome name='home' size={22} color='white' />
-      </TouchableOpacity>
+      {/* List */}
+      {sorted.length === 0 ? (
+        <View style={styles.emptyBox}>
+          <Ionicons name='document-outline' size={54} color='#e5e7eb' />
+          <Text style={styles.emptyText}>কোনো নোট নেই</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={sorted}
+          keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={{ paddingBottom: 40, paddingTop: 4 }}
+          renderItem={renderNote}
+        />
+      )}
 
-      {/* ===== Notes List ===== */}
-      <FlatList
-        data={notes}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{ paddingBottom: 120 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.noteCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              setSelectedNote(item);
-              setShowEditor(true);
-            }}
-          >
-            <Text style={styles.noteTitle}>
-              {item.pinned ? '📌 ' : ''}
-              {item.title || 'Untitled'}
-            </Text>
-
-            <Text style={styles.noteDate}>
-              {dayjs(item.updatedAt || item.createdAt).format('DD MMM YYYY')}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
-
-      {/* ===== Note Editor ===== */}
+      {/* Editor */}
       <NoteEditor
         visible={showEditor}
         note={selectedNote}
@@ -74,10 +93,7 @@ export default function NotesPage() {
           if (data.id) {
             editNote(data);
           } else {
-            addNote({
-              ...data,
-              pinned: 0,
-            });
+            addNote({ ...data, pinned: 0 });
             setShowEditor(false);
           }
         }}
@@ -90,51 +106,66 @@ export default function NotesPage() {
   );
 }
 
-/* ================= STYLES ================= */
-
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    // padding: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8f9fb',
   },
-
   header: {
-    marginRight: 25,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginTop: 25,
+    marginBottom: 14,
   },
-
+  iconBtn: { padding: 6 },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  addBtn: {
+    backgroundColor: '#6366f1',
+    borderRadius: 12,
+    padding: 6,
+  },
   noteCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     marginHorizontal: 16,
-    marginTop: 16,
-    backgroundColor: '#ffffff',
-    padding: 16,
-    borderRadius: 18,
-    boxShadow: '0 6px 30px #00000022',
+    marginBottom: 10,
+    boxShadow: '0 4px 16px #00000010',
   },
-
+  noteCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
   noteTitle: {
     fontSize: 15,
     fontWeight: '600',
     color: '#111827',
-    marginBottom: 6,
+    flex: 1,
+    marginRight: 8,
   },
-
   noteDate: {
-    fontSize: 12,
-    color: '#6b7280',
+    fontSize: 11,
+    color: '#d1d5db',
   },
-
-  homeButton: {
-    zIndex: 100,
-    position: 'absolute',
-    bottom: 90,
-    right: 20,
-    backgroundColor: '#22c55e',
-    padding: 16,
-    borderRadius: 50,
-    boxShadow: '0 6px 30px #00000022',
+  emptyBox: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingBottom: 80,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: '#d1d5db',
+    fontWeight: '600',
   },
 });
