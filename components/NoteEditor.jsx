@@ -11,7 +11,8 @@ import {
   View,
 } from 'react-native';
 
-// শেষ লাইন দেখে open করার সময় mode বোঝা
+const TOOLBAR_HEIGHT = 52;
+
 const detectListMode = (text) => {
   if (!text) return null;
   const lines = text.split('\n').filter((l) => l.trim() !== '');
@@ -29,8 +30,6 @@ export default function NoteEditor({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [pinned, setPinned] = useState(0);
-  // listMode = null মানে পরের Enter সাধারণ নতুন লাইন
-  // listMode = 'number' মানে পরের Enter এ auto-number আসবে
   const [listMode, setListMode] = useState(null);
 
   const undoStack = useRef([]);
@@ -39,7 +38,6 @@ export default function NoteEditor({
   const saveTimer = useRef(null);
   const firstLoad = useRef(true);
 
-  /* ── sync ── */
   useEffect(() => {
     const c = note?.content || '';
     setTitle(note?.title || '');
@@ -53,7 +51,6 @@ export default function NoteEditor({
 
   const hasContent = () => title.trim().length > 0 || content.trim().length > 0;
 
-  /* ── auto save / delete ── */
   useEffect(() => {
     if (!note?.id) return;
     if (firstLoad.current) {
@@ -72,13 +69,11 @@ export default function NoteEditor({
     return () => clearTimeout(saveTimer.current);
   }, [title, content, pinned]);
 
-  /* ── close ── */
   const handleClose = () => {
     if (!note?.id && hasContent()) onSave({ title, content, pinned });
     onClose();
   };
 
-  /* ── Android back ── */
   useEffect(() => {
     if (!visible) return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -88,17 +83,12 @@ export default function NoteEditor({
     return () => sub.remove();
   }, [visible, title, content]);
 
-  /* ── manual save ── */
   const handleSave = () => {
     if (!hasContent()) return;
     onSave({ id: note?.id, title, content, pinned });
     onClose();
   };
 
-  /* ── content change ─────────────────────────────────────────
-     listMode শুধু Enter এর আচরণ নিয়ন্ত্রণ করে।
-     বাকি সব লেখা যেভাবে আছে সেভাবেই থাকে।
-  ── */
   const handleContentChange = (text) => {
     if (!isUndoRedo.current) {
       undoStack.current.push(content);
@@ -109,9 +99,7 @@ export default function NoteEditor({
     if (listMode === 'number' && text.endsWith('\n')) {
       const lines = text.split('\n');
       const prev = lines[lines.length - 2] || '';
-
       if (prev.match(/^(\d+)\.\s/)) {
-        // আগের line এ content আছে? → পরের number দাও
         const hasText = prev.replace(/^\d+\.\s/, '').trim().length > 0;
         if (hasText) {
           const n = Number(prev.match(/^(\d+)/)[1]) + 1;
@@ -119,33 +107,23 @@ export default function NoteEditor({
           setContent(lines.join('\n'));
           return;
         } else {
-          // খালি numbered line এ Enter → list শেষ, plain line
-          lines[lines.length - 2] = ''; // empty number line মুছো
+          lines[lines.length - 2] = '';
           lines[lines.length - 1] = '';
           setListMode(null);
           setContent(lines.join('\n'));
           return;
         }
       }
-      // list mode আছে কিন্তু আগের line number না → plain Enter
     }
-
     setContent(text);
   };
 
-  /* ── list বাটন ───────────────────────────────────────────────
-     শুধু mode বদলায় + cursor এর পরে নতুন numbered line শুরু করে।
-     আগের content অপরিবর্তিত।
-  ── */
   const activateList = () => {
     setListMode('number');
-    // content এর শেষে নতুন numbered line যোগ (যদি ইতিমধ্যে না থাকে)
     setContent((prev) => {
       const lines = prev.split('\n');
       const lastLine = lines[lines.length - 1] || '';
-      // শেষ line ইতিমধ্যে numbered? তাহলে কিছু করার নেই
       if (/^\d+\.\s/.test(lastLine)) return prev;
-      // শেষ numbered line খুঁজে পরবর্তী number বের করো
       let nextN = 1;
       for (let i = lines.length - 1; i >= 0; i--) {
         const m = lines[i].match(/^(\d+)\.\s/);
@@ -161,14 +139,8 @@ export default function NoteEditor({
     });
   };
 
-  /* ── plain text বাটন ─────────────────────────────────────────
-     শুধু mode বদলায়।
-     পরের Enter থেকে সাধারণ line আসবে।
-     আগের list item গুলো যেভাবে আছে সেভাবেই থাকবে।
-  ── */
   const activatePlain = () => {
     setListMode(null);
-    // cursor এর পরে নতুন plain line শুরু করো (যদি শেষটা numbered হয়)
     setContent((prev) => {
       const lines = prev.split('\n');
       const lastLine = lines[lines.length - 1] || '';
@@ -176,7 +148,6 @@ export default function NoteEditor({
         /^\d+\.\s/.test(lastLine) &&
         lastLine.replace(/^\d+\.\s/, '').trim() === ''
       ) {
-        // শেষে খালি numbered line আছে → সরাও
         lines.pop();
         return lines.join('\n') + '\n';
       }
@@ -184,7 +155,6 @@ export default function NoteEditor({
     });
   };
 
-  /* ── undo / redo ── */
   const undo = () => {
     if (!undoStack.current.length) return;
     isUndoRedo.current = true;
@@ -198,7 +168,6 @@ export default function NoteEditor({
     setContent(redoStack.current.pop());
   };
 
-  /* ── delete ── */
   const confirmDelete = () => {
     Alert.alert('নোট মুছবেন?', 'এই নোটটি স্থায়ীভাবে মুছে যাবে।', [
       { text: 'বাতিল', style: 'cancel' },
@@ -221,11 +190,65 @@ export default function NoteEditor({
       onRequestClose={handleClose}
     >
       <View style={styles.container}>
-        {/* ── HEADER ── */}
+        {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleClose} style={styles.iconBtn}>
             <Ionicons name='arrow-back' size={22} color='#374151' />
           </TouchableOpacity>
+          {/* tool bar */}
+          <View style={styles.toolbar}>
+            <TouchableOpacity
+              onPress={undo}
+              disabled={!undoStack.current.length}
+              style={styles.toolBtn}
+            >
+              <MaterialCommunityIcons
+                name='undo'
+                size={22}
+                color={undoStack.current.length ? '#374151' : '#d1d5db'}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={redo}
+              disabled={!redoStack.current.length}
+              style={styles.toolBtn}
+            >
+              <MaterialCommunityIcons
+                name='redo'
+                size={22}
+                color={redoStack.current.length ? '#374151' : '#d1d5db'}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={activatePlain}
+              style={[
+                styles.toolBtn,
+                listMode === null && styles.toolBtnActive,
+              ]}
+            >
+              <MaterialCommunityIcons
+                name='format-text'
+                size={22}
+                color={listMode === null ? '#6366f1' : '#374151'}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={activateList}
+              style={[
+                styles.toolBtn,
+                listMode === 'number' && styles.toolBtnActive,
+              ]}
+            >
+              <MaterialCommunityIcons
+                name='format-list-numbered'
+                size={22}
+                color={listMode === 'number' ? '#6366f1' : '#374151'}
+              />
+            </TouchableOpacity>
+          </View>
           <View style={styles.headerRight}>
             <TouchableOpacity
               onPress={() => setPinned((p) => (p ? 0 : 1))}
@@ -239,7 +262,7 @@ export default function NoteEditor({
             </TouchableOpacity>
             <TouchableOpacity onPress={handleSave} style={styles.saveBtn}>
               <Ionicons name='checkmark' size={16} color='#fff' />
-              <Text style={styles.saveBtnText}>সেভ</Text>
+              <Text style={styles.saveBtnText}>Save</Text>
             </TouchableOpacity>
             {note?.id && (
               <TouchableOpacity onPress={confirmDelete} style={styles.iconBtn}>
@@ -249,7 +272,7 @@ export default function NoteEditor({
           </View>
         </View>
 
-        {/* ── TITLE ── */}
+        {/* TITLE */}
         <TextInput
           style={styles.titleInput}
           placeholder='শিরোনাম...'
@@ -261,7 +284,7 @@ export default function NoteEditor({
 
         <View style={styles.divider} />
 
-        {/* ── CONTENT ── */}
+        {/* CONTENT — নিচে toolbar + keyboard এর জায়গা রাখো */}
         <TextInput
           style={styles.contentInput}
           placeholder='লিখুন...'
@@ -271,71 +294,6 @@ export default function NoteEditor({
           onChangeText={handleContentChange}
           textAlignVertical='top'
         />
-
-        {/* ── TOOLBAR ── */}
-        <View style={styles.toolbar}>
-          {/* Undo */}
-          <TouchableOpacity
-            onPress={undo}
-            disabled={!undoStack.current.length}
-            style={styles.toolBtn}
-          >
-            <MaterialCommunityIcons
-              name='undo'
-              size={22}
-              color={undoStack.current.length ? '#374151' : '#d1d5db'}
-            />
-          </TouchableOpacity>
-
-          {/* Redo */}
-          <TouchableOpacity
-            onPress={redo}
-            disabled={!redoStack.current.length}
-            style={styles.toolBtn}
-          >
-            <MaterialCommunityIcons
-              name='redo'
-              size={22}
-              color={redoStack.current.length ? '#374151' : '#d1d5db'}
-            />
-          </TouchableOpacity>
-
-          <View style={styles.separator} />
-
-          {/* Plain text */}
-          <TouchableOpacity
-            onPress={activatePlain}
-            style={[styles.toolBtn, listMode === null && styles.toolBtnActive]}
-          >
-            <MaterialCommunityIcons
-              name='format-text'
-              size={22}
-              color={listMode === null ? '#6366f1' : '#374151'}
-            />
-          </TouchableOpacity>
-
-          {/* Ordered list */}
-          <TouchableOpacity
-            onPress={activateList}
-            style={[
-              styles.toolBtn,
-              listMode === 'number' && styles.toolBtnActive,
-            ]}
-          >
-            <MaterialCommunityIcons
-              name='format-list-numbered'
-              size={22}
-              color={listMode === 'number' ? '#6366f1' : '#374151'}
-            />
-          </TouchableOpacity>
-
-          {/* Mode indicator */}
-          <View style={styles.modeIndicator}>
-            <Text style={styles.modeText}>
-              {listMode === 'number' ? '📋 লিস্ট মোড' : '📝 টেক্সট মোড'}
-            </Text>
-          </View>
-        </View>
       </View>
     </Modal>
   );
@@ -354,12 +312,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
-  headerRight: {
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  iconBtn: { padding: 8, borderRadius: 10 },
+
+  toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
-  iconBtn: { padding: 8, borderRadius: 10 },
+  toolBtn: { padding: 8, borderRadius: 10 },
+  toolBtnActive: { backgroundColor: '#ede9fe' },
   saveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -390,35 +352,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     lineHeight: 26,
-  },
-  toolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    backgroundColor: '#fafafa',
-    borderTopWidth: 1,
-    borderColor: '#f0f0f0',
-    gap: 4,
-  },
-  toolBtn: { padding: 8, borderRadius: 10 },
-  toolBtnActive: { backgroundColor: '#ede9fe' },
-  separator: {
-    width: 1,
-    height: 22,
-    backgroundColor: '#e5e7eb',
-    marginHorizontal: 6,
-  },
-  modeIndicator: {
-    marginLeft: 'auto',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    backgroundColor: '#f3f4f6',
-  },
-  modeText: {
-    fontSize: 11,
-    color: '#9ca3af',
-    fontWeight: '600',
   },
 });
