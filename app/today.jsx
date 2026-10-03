@@ -28,7 +28,7 @@ export default function Today() {
   ];
 
   const filteredData = combinedData.filter(
-    (item) => safeISODate(item.date) === todayISO
+    (item) => safeISODate(item.date) === todayISO,
   );
 
   const totalSell = filteredData
@@ -85,7 +85,7 @@ export default function Today() {
           <>
             <View style={styles.summaryContainer}>
               <View style={styles.titleBox}>
-                <Text style={styles.summaryTitle}>আজকের হিসাব</Text>
+                <Text style={styles.summaryTitle}>{totalIncome}</Text>
               </View>
               <View style={styles.summaryBoxes}>
                 <SummaryList
@@ -133,11 +133,11 @@ const styles = StyleSheet.create({
     borderRadius: 22,
   },
   summaryTitle: {
-    fontSize: 23,
-    fontWeight: 600,
+    fontSize: 30,
+    fontWeight: 700,
     padding: 10,
     textAlign: 'center',
-    color: '#109b8b',
+    color: '#2F4F4F',
   },
   summaryBoxes: {
     flex: 2,
@@ -154,16 +154,16 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  incomeCard: { backgroundColor: '#dcfce7' },
-  expenseCard: { backgroundColor: '#fee2e2' },
+  incomeCard: { backgroundColor: '#edf4f4' },
+  expenseCard: { backgroundColor: '#f2e5e5' },
   itemText: { flex: 1, textAlign: 'center' },
-  incomeText: { color: '#16a34a', fontWeight: 'bold' },
-  expenseText: { color: '#b91c1c', fontWeight: 'bold' },
+  incomeText: { color: '#2F4F4F', fontWeight: 'bold' },
+  expenseText: { color: '#1B1B1D', fontWeight: 'bold' },
   homeButton: {
     position: 'absolute',
     bottom: 100,
     right: 20,
-    backgroundColor: '#22c55e',
+    backgroundColor: '#2F4F4F',
     padding: 16,
     borderRadius: 50,
     shadowColor: '#000',

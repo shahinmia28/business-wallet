@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
 
   container: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#EAEDED',
     padding: 16,
     borderRadius: 26,
     margin: 10,
@@ -183,14 +183,14 @@ const styles = StyleSheet.create({
 
   input: {
     fontSize: 36,
-    color: '#111827',
+    color: '#1B1B1D',
     textAlign: 'right',
     paddingVertical: 8,
   },
 
   result: {
     fontSize: 20,
-    color: '#6b7280',
+    color: '#3A3A3C',
     textAlign: 'right',
     marginTop: 4,
   },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 64,
     marginHorizontal: 6,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
@@ -220,19 +220,19 @@ const styles = StyleSheet.create({
   keyText: {
     fontSize: 22,
     fontWeight: '600',
-    color: '#111827',
+    color: '#1B1B1D',
   },
 
   operatorKey: {
-    backgroundColor: '#eef2ff',
+    backgroundColor: '#D7DCDC',
   },
 
   operatorText: {
-    color: '#4f46e5',
+    color: '#2F4F4F',
   },
 
   equalKey: {
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#2F4F4F',
     flex: 2,
   },
 

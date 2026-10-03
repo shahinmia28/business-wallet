@@ -43,6 +43,13 @@ export async function createBackup() {
     getAllNotes(),
   ]);
 
+  const portableCustomers = customers.map(
+    ({ prescriptionPhotoPath, ...rest }) => ({
+      ...rest,
+      prescriptionPhotoPath: null,
+    }),
+  );
+
   const backup = {
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
@@ -50,7 +57,7 @@ export async function createBackup() {
     incomes,
     suppliers,
     supplierTransactions,
-    customers,
+    customers: portableCustomers,
     customerTransactions,
     notes,
   };
@@ -243,6 +250,7 @@ export async function restoreBackup() {
           address: c.address,
           note: c.note,
           createdAt: c.createdAt,
+          prescriptionPhotoPath: null,
         });
         customerIdMap[c.id] = r.lastInsertRowId;
         stats.customers++;

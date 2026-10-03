@@ -75,7 +75,7 @@ export default function IncomeForm() {
           style={styles.input}
           onPress={() => setShowPicker(true)}
         >
-          <Text style={{ color: '#5f5f5f' }}>{BDDateTime(selectedDate)}</Text>
+          <Text style={{ color: '#3A3A3C' }}>{BDDateTime(selectedDate)}</Text>
         </TouchableOpacity>
         {showPicker && (
           <DateTimePicker
@@ -111,7 +111,7 @@ export default function IncomeForm() {
         style={styles.calcFloatBtn}
         onPress={() => setShowCalc(true)}
       >
-        <FontAwesome name='calculator' size={35} color='#ff8000' />
+        <FontAwesome name='calculator' size={35} color='#2F4F4F' />
       </TouchableOpacity>
 
       {/* Calculator Modal */}
@@ -135,14 +135,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 16,
-    color: '#14b8a6',
+    color: '#2F4F4F',
   },
   input: {
-    backgroundColor: '#ffffff',
-    boxShadow: '0 6px 30px #00000022',
+    backgroundColor: '#EAEDED',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
+    borderWidth: 0.5,
+    borderColor: '#D7DCDC',
   },
 
   buttonRow: {
@@ -157,19 +159,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 4,
   },
-  backButton: { backgroundColor: '#374151' },
-  submitButton: { backgroundColor: '#14b8a6' },
-  buttonText: { color: 'white', fontWeight: 'bold' },
+  backButton: { backgroundColor: '#3A3A3C' },
+  submitButton: { backgroundColor: '#2F4F4F' },
+  buttonText: { color: '#EAEDED', fontWeight: 'bold' },
 
   calcFloatBtn: {
     position: 'absolute',
     bottom: 100,
     right: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#EAEDED',
     padding: 16,
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0 2px 20px #00000022',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
   },
 });

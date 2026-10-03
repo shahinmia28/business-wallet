@@ -25,7 +25,7 @@ export default function Home() {
 
       <View style={styles.openCalcBtnContainer}>
         {calcResult !== null && (
-          <Text style={{ marginBottom: 10, fontSize: 12, color: '#686868' }}>
+          <Text style={{ marginBottom: 10, fontSize: 12, color: '#3A3A3C' }}>
             Result = {calcResult}
           </Text>
         )}
@@ -33,7 +33,7 @@ export default function Home() {
           style={styles.openCalcBtn}
           onPress={() => setCalcVisible(true)}
         >
-          <FontAwesome name='calculator' size={35} color='#ff8000' />
+          <FontAwesome name='calculator' size={35} color='#2F4F4F' />
         </TouchableOpacity>
       </View>
 
@@ -53,15 +53,16 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     alignItems: 'center',
     width: '100%',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     height: '100%',
   },
   openCalcBtn: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#EAEDED',
     padding: 16,
     borderRadius: 100,
     alignItems: 'center',
-    boxShadow: '0 6px 30px #00000022',
+
+    boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
   },
   openCalcBtnContainer: {
     position: 'absolute',
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   openCalcBtnText: {
-    color: 'white',
+    color: '#1B1B1D',
     fontWeight: 'bold',
     fontSize: 18,
   },

@@ -3,6 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -61,14 +62,14 @@ export default function CustomerPage() {
       {/* Header */}
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name='arrow-back' size={24} color='#11181C' />
+          <Ionicons name='arrow-back' size={24} color='#1B1B1D' />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>কাস্টমার</Text>
         <TouchableOpacity
           onPress={() => router.push('/addcustomer')}
           style={styles.addBtn}
         >
-          <Ionicons name='add' size={24} color='#fff' />
+          <Ionicons name='add' size={24} color='#EAEDED' />
         </TouchableOpacity>
       </View>
 
@@ -78,7 +79,7 @@ export default function CustomerPage() {
           label='মোট কাস্টমার'
           value={summary.totalCustomer}
           icon='people-outline'
-          color='#008080ac'
+          color='#2F4F4F'
           isCount
         />
         <View style={styles.divider} />
@@ -86,21 +87,21 @@ export default function CustomerPage() {
           label='মোট বিক্রয়'
           value={fmt(summary.totalSale)}
           icon='trending-up-outline'
-          color='#14b8a6'
+          color='#3A3A3C'
         />
         <View style={styles.divider} />
         <SummaryItem
           label='আদায়'
           value={fmt(summary.totalPayment)}
           icon='cash-outline'
-          color='#6366f1'
+          color='#2F4F4F'
         />
         <View style={styles.divider} />
         <SummaryItem
           label='বাকি'
           value={fmt(summary.totalDue)}
           icon='alert-circle-outline'
-          color='#f59e0b'
+          color='#3A3A3C'
         />
       </View>
 
@@ -124,7 +125,7 @@ export default function CustomerPage() {
       {loading ? (
         <ActivityIndicator
           size='large'
-          color='#008080ac'
+          color='#2F4F4F'
           style={{ marginTop: 40 }}
         />
       ) : filtered.length === 0 ? (
@@ -149,7 +150,7 @@ export default function CustomerPage() {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 30 }}
+          contentContainerStyle={{ paddingBottom: 30, marginHorizontal: 16 }}
         >
           {filtered.map((c) => (
             <TouchableOpacity
@@ -160,9 +161,17 @@ export default function CustomerPage() {
             >
               {/* Avatar */}
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {c.name.charAt(0).toUpperCase()}
-                </Text>
+                {c.profileImagePath ? (
+                  <Image
+                    source={{ uri: c.profileImagePath }}
+                    style={styles.avatarImage}
+                    resizeMode='cover'
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>
+                    {c.name?.charAt(0)?.toUpperCase() || '?'}
+                  </Text>
+                )}
               </View>
 
               {/* Info */}
@@ -181,7 +190,7 @@ export default function CustomerPage() {
                 <Text
                   style={[
                     styles.dueAmount,
-                    { color: c.due > 0 ? '#f59e0b' : '#14b8a6' },
+                    { color: c.due > 0 ? '#3A3A3C' : '#2F4F4F' },
                   ]}
                 >
                   {fmt(c.due)}
@@ -213,8 +222,6 @@ function SummaryItem({ label, value, icon, color, isCount }) {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: '#f4f6f8',
-    paddingHorizontal: 16,
   },
   headerRow: {
     flexDirection: 'row',
@@ -222,73 +229,82 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 50,
     marginBottom: 16,
+    marginHorizontal: 16,
   },
   backBtn: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#11181C' },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B1B1D' },
   addBtn: {
-    backgroundColor: '#008080ac',
+    backgroundColor: '#2F4F4F',
     borderRadius: 12,
     padding: 6,
   },
   summaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#e9ecec',
     borderRadius: 20,
     padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    boxShadow: '0 6px 30px #00000022',
+    boxShadow: '2px 0 8px 10px rgba(25, 25, 28, 0.062)',
     marginBottom: 14,
+    marginHorizontal: 16,
   },
   summaryItem: { flex: 1, alignItems: 'center', gap: 4 },
   summaryValue: { fontSize: 13, fontWeight: 'bold' },
-  summaryLabel: { fontSize: 10, color: '#888', textAlign: 'center' },
-  divider: { width: 1, height: 40, backgroundColor: '#e5e7eb' },
+  summaryLabel: { fontSize: 10, color: '#3A3A3C', textAlign: 'center' },
+  divider: { width: 1.5, height: 40, backgroundColor: '#D7DCDC' },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
+    marginHorizontal: 16,
     gap: 8,
-    boxShadow: '0 2px 10px #00000015',
+    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginBottom: 14,
   },
-  searchInput: { flex: 1, fontSize: 14, color: '#11181C' },
+  searchInput: { flex: 1, fontSize: 14, color: '#1B1B1D' },
   emptyBox: { alignItems: 'center', marginTop: 60, gap: 12 },
-  emptyText: { fontSize: 15, color: '#aaa' },
+  emptyText: { fontSize: 15, color: '#3A3A3C' },
   emptyAddBtn: {
-    backgroundColor: '#008080ac',
+    backgroundColor: '#2F4F4F',
     borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 10,
     marginTop: 8,
+    marginHorizontal: 16,
   },
-  emptyAddText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  emptyAddText: { color: '#EAEDED', fontWeight: 'bold', fontSize: 14 },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#d6dfdf',
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
     gap: 12,
-    boxShadow: '0 4px 20px #00000015',
   },
   avatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#ede9fe',
+    backgroundColor: '#D7DCDC',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  avatarText: { fontSize: 18, fontWeight: 'bold', color: '#6366f1' },
+  avatarImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  avatarText: { fontSize: 18, fontWeight: 'bold', color: '#1B1B1D' },
   cardInfo: { flex: 1, gap: 3 },
-  cardName: { fontSize: 15, fontWeight: '600', color: '#11181C' },
-  cardPhone: { fontSize: 12, color: '#888' },
+  cardName: { fontSize: 15, fontWeight: '600', color: '#1B1B1D' },
+  cardPhone: { fontSize: 12, color: '#3A3A3C' },
   cardRight: { alignItems: 'flex-end', gap: 2 },
   dueAmount: { fontSize: 14, fontWeight: 'bold' },
-  dueLabel: { fontSize: 10, color: '#aaa' },
+  dueLabel: { fontSize: 10, color: '#3A3A3C' },
 });

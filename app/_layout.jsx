@@ -41,7 +41,7 @@ export default function Layout() {
 
   return (
     <DataProvider>
-      <StatusBar style='dark' backgroundColor='#ffffff' />
+      <StatusBar style='dark' backgroundColor='#EAEDED' />
 
       {/* শুধু home পেজে global Header */}
       {showHeader && <Header onMenu={() => setMenuOpen(true)} />}

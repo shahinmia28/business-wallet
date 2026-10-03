@@ -7,15 +7,15 @@ export default function SummaryList({ totalExpense, totalIncome, totalSell }) {
     <View style={styles.summaryContainer}>
       <View style={styles.card}>
         <Text style={styles.title}>বিক্রি</Text>
-        <Text style={[styles.value, { color: '#2563eb' }]}>{totalSell}৳</Text>
+        <Text style={[styles.value, { color: '#1B1B1D' }]}>{totalSell}৳</Text>
       </View>
       <View style={styles.card}>
         <Text style={styles.title}>লাভ</Text>
-        <Text style={[styles.value, { color: '#16a34a' }]}>{totalIncome}৳</Text>
+        <Text style={[styles.value, { color: '#3A3A3C' }]}>{totalIncome}৳</Text>
       </View>
       <View style={styles.card}>
         <Text style={styles.title}>ব্যয়</Text>
-        <Text style={[styles.value, { color: '#dc2626' }]}>
+        <Text style={[styles.value, { color: '#b6031b' }]}>
           {totalExpense}৳
         </Text>
       </View>
@@ -25,7 +25,7 @@ export default function SummaryList({ totalExpense, totalIncome, totalSell }) {
         <Text
           style={[
             styles.value,
-            { color: balance >= 0 ? '#008080c7' : '#dc2626' },
+            { color: balance >= 0 ? '#1B1B1D' : '#3A3A3C' },
           ]}
         >
           {balance}৳
@@ -35,17 +35,16 @@ export default function SummaryList({ totalExpense, totalIncome, totalSell }) {
   );
 }
 const styles = StyleSheet.create({
-  /* -------- Summary -------- */
   summaryContainer: {
     gap: 10,
   },
 
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#EAEDED',
     borderRadius: 18,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    boxShadow: '0 4px 30px #00000022',
+    paddingVertical: 12,
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -54,7 +53,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#3A3A3C',
   },
   value: {
     fontSize: 16,

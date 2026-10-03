@@ -36,7 +36,7 @@ export default function EditDeleteModal({ visible, item, onClose }) {
   const [reason, setReason] = useState(item.reason || '');
   const [amount, setAmount] = useState(String(item.amount || ''));
   const [selAmount, setSelAmount] = useState(
-    item.type === 'income' ? String(item.selAmount || '') : ''
+    item.type === 'income' ? String(item.selAmount || '') : '',
   );
 
   const [selectedDate, setSelectedDate] = useState(new Date(item.date));
@@ -128,7 +128,7 @@ export default function EditDeleteModal({ visible, item, onClose }) {
             setTimeout(() => Toast.hide(), 5000);
           },
         },
-      ]
+      ],
     );
   };
 
@@ -184,7 +184,7 @@ export default function EditDeleteModal({ visible, item, onClose }) {
                     ]}
                     onPress={() => setReason(item)}
                   >
-                    <Text style={{ color: '#5f5f5f' }}>{item}</Text>
+                    <Text style={{ color: '#3A3A3C' }}>{item}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -238,13 +238,13 @@ export default function EditDeleteModal({ visible, item, onClose }) {
           {/* ===== BUTTONS ===== */}
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-              <Text style={{ color: '#16a34a', fontWeight: 'bold' }}>
+              <Text style={{ color: '#2F4F4F', fontWeight: 'bold' }}>
                 Update
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.button} onPress={handleDelete}>
-              <Text style={{ color: '#d01f1f', fontWeight: 'bold' }}>
+              <Text style={{ color: '#1B1B1D', fontWeight: 'bold' }}>
                 Delete
               </Text>
             </TouchableOpacity>
@@ -281,8 +281,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
   },
-  incomeHeader: { color: '#16a34a' },
-  expenseHeader: { color: '#d01f1f' },
+  incomeHeader: { color: '#2F4F4F' },
+  expenseHeader: { color: '#1B1B1D' },
   label: {
     color: '#606060',
     fontSize: 15,

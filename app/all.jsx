@@ -184,7 +184,7 @@ export default function All() {
             onPress={() => setShowConfirmDelete(true)}
             style={styles.deleteAllBtn}
           >
-            <Text style={{ color: '#dc2626', fontWeight: 'bold' }}>
+            <Text style={{ color: '#1B1B1D', fontWeight: 'bold' }}>
               Delete All
             </Text>
           </TouchableOpacity>
@@ -193,7 +193,7 @@ export default function All() {
             disabled={backingUp}
             style={[styles.deleteAllBtn, backingUp && { opacity: 0.5 }]}
           >
-            <Text style={{ color: '#26acdc', fontWeight: 'bold' }}>
+            <Text style={{ color: '#2F4F4F', fontWeight: 'bold' }}>
               {backingUp ? '...' : 'PDF Share'}
             </Text>
           </TouchableOpacity>
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     padding: 10,
     textAlign: 'center',
-    color: '#109b8b',
+    color: '#2F4F4F',
   },
   summaryBoxes: { flex: 2 },
   dateAndDeleteBox: {
@@ -307,10 +307,13 @@ const styles = StyleSheet.create({
   },
   deleteAllBtn: {
     flex: 1,
-    boxShadow: '0 6px 30px #dc26261b',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     padding: 10,
     borderRadius: 12,
     alignItems: 'center',
+    backgroundColor: '#EAEDED',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
   },
   modeRow: { flexDirection: 'row', marginBottom: 15 },
   modeBtn: {
@@ -321,7 +324,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     boxShadow: '0 6px 30px #00000022',
   },
-  modeActive: { backgroundColor: '#22c55e' },
+  modeActive: { backgroundColor: '#2F4F4F' },
   modeText: { fontWeight: 'bold', color: '#464646' },
   deleteAllBtnContainer: { flexDirection: 'row', justifyContent: 'flex-end' },
   itemCard: {
@@ -331,16 +334,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 5,
   },
-  incomeCard: { backgroundColor: '#dcfce7' },
-  expenseCard: { backgroundColor: '#fee2e2' },
+  incomeCard: { backgroundColor: '#edf4f4' },
+  expenseCard: { backgroundColor: '#f2e5e5' },
   itemText: { flex: 1, textAlign: 'center' },
-  incomeText: { color: '#16a34a', fontWeight: 'bold' },
-  expenseText: { color: '#b91c1c', fontWeight: 'bold' },
+  incomeText: { color: '#2F4F4F', fontWeight: 'bold' },
+  expenseText: { color: '#1B1B1D', fontWeight: 'bold' },
   homeBtn: {
     position: 'absolute',
     right: 20,
     bottom: 100,
-    backgroundColor: '#16a34a',
+    backgroundColor: '#2F4F4F',
     padding: 16,
     borderRadius: 50,
     elevation: 5,

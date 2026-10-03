@@ -1,11 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useData } from '../context/DataContext';
 
 export default function Header({ onMenu }) {
   const { expenses, incomes } = useData();
-  const router = useRouter();
 
   // 🆕 আজকের তারিখ
   const today = new Date();
@@ -34,11 +32,15 @@ export default function Header({ onMenu }) {
       <View style={styles.container}>
         {/* Hamburger */}
         <TouchableOpacity onPress={onMenu}>
-          <MaterialCommunityIcons name='menu' size={28} color='#008080a4' />
+          <MaterialCommunityIcons name='menu' size={28} color='#1B1B1D' />
         </TouchableOpacity>
 
         <View style={styles.balance}>
-          <MaterialCommunityIcons name='currency-bdt' size={18} color='white' />
+          <MaterialCommunityIcons
+            name='currency-bdt'
+            size={18}
+            color='#EAEDED'
+          />
           <Text style={styles.balanceText}>{balance}</Text>
         </View>
       </View>
@@ -54,7 +56,8 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '90%',
-    boxShadow: '0 2px 20px #00000022',
+    backgroundColor: '#EAEDED',
+    boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
     padding: 16,
     borderRadius: 20,
     flexDirection: 'row',
@@ -66,13 +69,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#008080ac',
+    backgroundColor: '#2F4F4F',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   balanceText: {
-    color: '#fff',
+    color: '#EAEDED',
     fontWeight: 'bold',
   },
 });

@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Linking,
   Modal,
@@ -19,6 +20,7 @@ import {
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import PrescriptionPhotoPicker from '../../components/PrescriptionPhotoPicker';
 import {
   deleteCustomer,
   deleteCustomerTransaction,
@@ -29,6 +31,13 @@ import {
   updateCustomerTransaction,
 } from '../../database/db';
 import BDDateTime from '../../utils/BDDateTime';
+import { pickPhoneFromContacts } from '../../utils/contactPicker';
+import {
+  deletePrescriptionImage,
+  deleteProfileImage,
+  saveCustomerPrescriptionImage,
+  saveProfileImage,
+} from '../../utils/customerPrescription';
 import {
   generateStatement,
   shareStatement,
@@ -48,9 +57,11 @@ export default function CustomerDetail() {
   const [txModal, setTxModal] = useState(false);
   const [editTx, setEditTx] = useState(null);
   const [editCustomerModal, setEditCustomerModal] = useState(false);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [profileViewerVisible, setProfileViewerVisible] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [c, txs] = await Promise.all([
@@ -64,12 +75,12 @@ export default function CustomerDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [id]),
+    }, [loadData]),
   );
 
   const handleCall = async (phone) => {
@@ -150,7 +161,7 @@ export default function CustomerDetail() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size='large' color='#008080ac' />
+        <ActivityIndicator size='large' color='#2F4F4F' />
       </View>
     );
   }
@@ -158,7 +169,7 @@ export default function CustomerDetail() {
   if (!customer) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: '#888' }}>কাস্টমার পাওয়া যায়নি</Text>
+        <Text style={{ color: '#3A3A3C' }}>কাস্টমার পাওয়া যায়নি</Text>
       </View>
     );
   }
@@ -168,7 +179,7 @@ export default function CustomerDetail() {
       {/* Header */}
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name='arrow-back' size={24} color='#11181C' />
+          <Ionicons name='arrow-back' size={24} color='#1B1B1D' />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {customer.name}
@@ -178,20 +189,21 @@ export default function CustomerDetail() {
             onPress={() => setEditCustomerModal(true)}
             style={styles.iconBtn}
           >
-            <Ionicons name='create-outline' size={22} color='#008080' />
+            <Ionicons name='create-outline' size={22} color='#2F4F4F' />
           </TouchableOpacity>
+
           <TouchableOpacity
             onPress={handleStatement}
             style={[styles.iconBtn, generating && { opacity: 0.5 }]}
             disabled={generating}
           >
-            <Ionicons name='share-outline' size={22} color='#6366f1' />
+            <Ionicons name='share-outline' size={22} color='#3A3A3C' />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleDeleteCustomer}
             style={styles.iconBtn}
           >
-            <Ionicons name='trash-outline' size={22} color='#ef4444' />
+            <Ionicons name='trash-outline' size={22} color='#1B1B1D' />
           </TouchableOpacity>
         </View>
       </View>
@@ -202,23 +214,37 @@ export default function CustomerDetail() {
       >
         {/* Info Card */}
         <View style={styles.infoCard}>
-          <View style={styles.avatarLarge}>
-            <Text style={styles.avatarLargeText}>
-              {customer.name.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+          {customer.profileImagePath ? (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setProfileViewerVisible(true)}
+              style={styles.avatarLarge}
+            >
+              <Image
+                source={{ uri: customer.profileImagePath }}
+                style={styles.avatarImage}
+                resizeMode='cover'
+              />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.avatarLarge}>
+              <Text style={styles.avatarLargeText}>
+                {customer.name.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
           <View style={styles.infoRows}>
             {customer.phone ? (
               <Pressable
                 onPress={() => handleCall(customer.phone)}
-                android_ripple={{ color: '#DCFCE7' }}
+                android_ripple={{ color: '#dfe3e3' }}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  backgroundColor: '#F0FDF4',
+                  backgroundColor: '#dfe3e3',
                   borderWidth: 1,
-                  borderColor: '#86EFAC',
+                  borderColor: '#2F4F4F',
                   borderRadius: 12,
                   paddingHorizontal: 12,
                   paddingVertical: 10,
@@ -230,16 +256,16 @@ export default function CustomerDetail() {
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: '#22C55E',
+                    backgroundColor: '#2F4F4F',
                     paddingHorizontal: 10,
                     paddingVertical: 6,
                     borderRadius: 20,
                   }}
                 >
-                  <Ionicons name='call' size={16} color='#fff' />
+                  <Ionicons name='call' size={16} color='#EAEDED' />
                   <Text
                     style={{
-                      color: '#fff',
+                      color: '#EAEDED',
                       fontWeight: '700',
                       marginLeft: 5,
                       fontSize: 13,
@@ -261,6 +287,28 @@ export default function CustomerDetail() {
               <InfoRow icon='document-text-outline' text={customer.note} />
             ) : null}
           </View>
+          <View style={styles.prescriptionSection}>
+            {customer.prescriptionPhotoPath ? (
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => setViewerVisible(true)}
+                style={styles.prescriptionThumbWrap}
+              >
+                <Image
+                  source={{ uri: customer.prescriptionPhotoPath }}
+                  style={styles.prescriptionThumb}
+                  resizeMode='cover'
+                />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={() => setEditCustomerModal(true)}
+                style={styles.emptyPrescriptionButton}
+              >
+                <Text style={styles.emptyPrescriptionText}>Add</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
         {/* Summary Bar */}
@@ -268,19 +316,19 @@ export default function CustomerDetail() {
           <SumItem
             label='মোট বিক্রয়'
             value={fmt(customer.totalSale)}
-            color='#14b8a6'
+            color='#2F4F4F'
           />
           <View style={styles.sumDivider} />
           <SumItem
             label='আদায়'
             value={fmt(customer.totalPayment)}
-            color='#6366f1'
+            color='#3A3A3C'
           />
           <View style={styles.sumDivider} />
           <SumItem
             label='বাকি'
             value={fmt(customer.due)}
-            color={customer.due > 0 ? '#f59e0b' : '#14b8a6'}
+            color={customer.due > 0 ? '#3A3A3C' : '#2F4F4F'}
           />
         </View>
 
@@ -324,6 +372,22 @@ export default function CustomerDetail() {
       >
         <Ionicons name='add' size={28} color='#fff' />
       </TouchableOpacity>
+
+      {customer.profileImagePath ? (
+        <PrescriptionViewer
+          visible={profileViewerVisible}
+          imageUri={customer.profileImagePath}
+          onClose={() => setProfileViewerVisible(false)}
+        />
+      ) : null}
+
+      {customer.prescriptionPhotoPath ? (
+        <PrescriptionViewer
+          visible={viewerVisible}
+          imageUri={customer.prescriptionPhotoPath}
+          onClose={() => setViewerVisible(false)}
+        />
+      ) : null}
 
       {/* Transaction Modal */}
       <TxModal
@@ -371,10 +435,10 @@ function TxCard({ tx, onEdit, onDelete }) {
         ) : null}
         <View style={styles.txActions}>
           <TouchableOpacity onPress={onEdit} style={styles.txBtn}>
-            <Ionicons name='create-outline' size={16} color='#008080' />
+            <Ionicons name='create-outline' size={16} color='#2F4F4F' />
           </TouchableOpacity>
           <TouchableOpacity onPress={onDelete} style={styles.txBtn}>
-            <Ionicons name='trash-outline' size={16} color='#ef4444' />
+            <Ionicons name='trash-outline' size={16} color='#1B1B1D' />
           </TouchableOpacity>
         </View>
       </View>
@@ -383,7 +447,7 @@ function TxCard({ tx, onEdit, onDelete }) {
         {tx.sale > 0 && (
           <View style={styles.txChip}>
             <Text style={styles.txChipLabel}>বিক্রয়</Text>
-            <Text style={[styles.txChipValue, { color: '#14b8a6' }]}>
+            <Text style={[styles.txChipValue, { color: '#2F4F4F' }]}>
               {fmt(tx.sale)}
             </Text>
           </View>
@@ -391,7 +455,7 @@ function TxCard({ tx, onEdit, onDelete }) {
         {tx.payment > 0 && (
           <View style={styles.txChip}>
             <Text style={styles.txChipLabel}>আদায়</Text>
-            <Text style={[styles.txChipValue, { color: '#6366f1' }]}>
+            <Text style={[styles.txChipValue, { color: '#3A3A3C' }]}>
               {fmt(tx.payment)}
             </Text>
           </View>
@@ -524,7 +588,7 @@ function TxModal({ visible, customerId, editData, onClose, onSaved }) {
               style={styles.modalInput}
               onPress={() => setShowPicker(true)}
             >
-              <Text style={{ color: '#5f5f5f' }}>
+              <Text style={{ color: '#3A3A3C' }}>
                 {BDDateTime(selectedDate)}
               </Text>
             </TouchableOpacity>
@@ -592,13 +656,33 @@ function EditCustomerModal({ visible, customer, onClose, onSaved }) {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [note, setNote] = useState('');
+  const [profileImageUri, setProfileImageUri] = useState(null);
+  const [prescriptionPhotoUri, setPrescriptionPhotoUri] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  const handleSelectContact = async () => {
+    const selected = await pickPhoneFromContacts({
+      currentName: name,
+      currentPhone: phone,
+    });
+    if (!selected) return;
+
+    if (!name.trim() && selected.name) {
+      setName(selected.name.trim());
+    }
+
+    if (selected.phone) {
+      setPhone(selected.phone);
+    }
+  };
 
   const onShow = () => {
     setName(customer?.name || '');
     setPhone(customer?.phone || '');
     setAddress(customer?.address || '');
     setNote(customer?.note || '');
+    setProfileImageUri(customer?.profileImagePath || null);
+    setPrescriptionPhotoUri(customer?.prescriptionPhotoPath || null);
   };
 
   const handleSave = async () => {
@@ -608,12 +692,47 @@ function EditCustomerModal({ visible, customer, onClose, onSaved }) {
     }
     setSaving(true);
     try {
+      let finalProfilePath = customer?.profileImagePath || null;
+      let finalPrescriptionPath = customer?.prescriptionPhotoPath || null;
+
+      if (profileImageUri && profileImageUri !== customer?.profileImagePath) {
+        finalProfilePath = await saveProfileImage({
+          uri: profileImageUri,
+          ownerId: customer.id,
+          ownerType: 'customer',
+          previousPath: customer?.profileImagePath || null,
+        });
+      }
+
+      if (!profileImageUri && customer?.profileImagePath) {
+        await deleteProfileImage(customer.profileImagePath);
+        finalProfilePath = null;
+      }
+
+      if (
+        prescriptionPhotoUri &&
+        prescriptionPhotoUri !== customer?.prescriptionPhotoPath
+      ) {
+        finalPrescriptionPath = await saveCustomerPrescriptionImage({
+          uri: prescriptionPhotoUri,
+          customerId: customer.id,
+          previousPath: customer?.prescriptionPhotoPath || null,
+        });
+      }
+
+      if (!prescriptionPhotoUri && customer?.prescriptionPhotoPath) {
+        await deletePrescriptionImage(customer.prescriptionPhotoPath);
+        finalPrescriptionPath = null;
+      }
+
       await updateCustomer({
         id: customer.id,
         name: name.trim(),
         phone: phone.trim(),
         address: address.trim(),
         note: note.trim(),
+        profileImagePath: finalProfilePath,
+        prescriptionPhotoPath: finalPrescriptionPath,
       });
       Toast.show({ type: 'success', text1: 'আপডেট হয়েছে' });
       onSaved();
@@ -642,59 +761,110 @@ function EditCustomerModal({ visible, customer, onClose, onSaved }) {
           onPress={onClose}
         />
         <View style={styles.modalSheet}>
-          <View style={styles.modalBtns}>
-            <Text style={styles.modalTitle}>Edit Customer</Text>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.saveBtn, saving && { opacity: 0.6 }]}
-              onPress={handleSave}
-              disabled={saving}
-            >
-              <Text style={styles.saveBtnText}>
-                {saving ? 'Saving...' : 'Save'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.modalLabel}>নাম *</Text>
-          <TextInput
-            style={styles.modalInput}
-            value={name}
-            onChangeText={setName}
-            placeholder='কাস্টমারের নাম'
-          />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.modalScrollContent}
+          >
+            <View style={styles.modalBtns}>
+              <Text style={styles.modalTitle}>Edit Customer</Text>
+              <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+                onPress={handleSave}
+                disabled={saving}
+              >
+                <Text style={styles.saveBtnText}>
+                  {saving ? 'Saving...' : 'Save'}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styles.modalLabel}>ফোন</Text>
-          <TextInput
-            style={styles.modalInput}
-            value={phone}
-            onChangeText={setPhone}
-            placeholder='01XXXXXXXXX'
-            keyboardType='phone-pad'
-          />
+            <PrescriptionPhotoPicker
+              value={profileImageUri}
+              onChange={setProfileImageUri}
+              label='Profile Image'
+              variant='avatar'
+            />
+            <Text style={styles.modalLabel}>নাম *</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={name}
+              onChangeText={setName}
+              placeholder='কাস্টমারের নাম'
+            />
 
-          <Text style={styles.modalLabel}>ঠিকানা</Text>
-          <TextInput
-            style={styles.modalInput}
-            value={address}
-            onChangeText={setAddress}
-            placeholder='ঠিকানা'
-          />
+            <Text style={styles.modalLabel}>ফোন</Text>
+            <View style={styles.phoneRow}>
+              <TextInput
+                style={[styles.modalInput, styles.phoneInput]}
+                value={phone}
+                onChangeText={setPhone}
+                placeholder='01XXXXXXXXX'
+                keyboardType='phone-pad'
+              />
+              <TouchableOpacity
+                style={styles.contactBtn}
+                onPress={handleSelectContact}
+                accessibilityLabel='Select phone number from contacts'
+              >
+                <Ionicons name='person-add-outline' size={20} color='#2F4F4F' />
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styles.modalLabel}>নোট</Text>
-          <TextInput
-            style={[
-              styles.modalInput,
-              { minHeight: 60, textAlignVertical: 'top' },
-            ]}
-            value={note}
-            onChangeText={setNote}
-            placeholder='নোট (ঐচ্ছিক)'
-            multiline
-          />
+            <Text style={styles.modalLabel}>ঠিকানা</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={address}
+              onChangeText={setAddress}
+              placeholder='ঠিকানা'
+            />
+
+            <Text style={styles.modalLabel}>নোট</Text>
+            <TextInput
+              style={[
+                styles.modalInput,
+                { minHeight: 60, textAlignVertical: 'top' },
+              ]}
+              value={note}
+              onChangeText={setNote}
+              placeholder='নোট '
+              multiline
+            />
+
+            <PrescriptionPhotoPicker
+              value={prescriptionPhotoUri}
+              onChange={setPrescriptionPhotoUri}
+            />
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+function PrescriptionViewer({ visible, imageUri, onClose }) {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType='fade'
+      onRequestClose={onClose}
+    >
+      <View style={styles.viewerOverlay}>
+        <View style={styles.viewerHeader}>
+          <TouchableOpacity onPress={onClose}>
+            <Text style={styles.closeText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Image
+          source={{ uri: imageUri }}
+          style={styles.viewerImage}
+          resizeMode='contain'
+        />
+      </View>
     </Modal>
   );
 }
@@ -724,7 +894,7 @@ function SumItem({ label, value, color }) {
    STYLES
 ═══════════════════════════════════════════════ */
 const styles = StyleSheet.create({
-  wrapper: { flex: 1, backgroundColor: '#f4f6f8', paddingHorizontal: 16 },
+  wrapper: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
   headerRow: {
@@ -739,18 +909,20 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#11181C',
+    color: '#1B1B1D',
     marginHorizontal: 8,
   },
   headerActions: { flexDirection: 'row', gap: 6 },
-  iconBtn: { padding: 6, borderRadius: 10, backgroundColor: '#f4f6f8' },
+  iconBtn: { padding: 6, borderRadius: 10, backgroundColor: '#EAEDED' },
 
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     borderRadius: 20,
     padding: 16,
-    boxShadow: '0 6px 30px #00000022',
+    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
+    marginHorizontal: 16,
     marginBottom: 12,
+    marginTop: 8,
     alignItems: 'center',
     gap: 12,
   },
@@ -758,55 +930,85 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#ede9fe',
+    backgroundColor: '#D7DCDC',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  avatarLargeText: { fontSize: 26, fontWeight: 'bold', color: '#6366f1' },
+  avatarImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+  },
+  avatarLargeText: { fontSize: 26, fontWeight: 'bold', color: '#1B1B1D' },
   infoRows: { width: '100%', gap: 6 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoRowText: { fontSize: 14, color: '#444' },
+  infoRowText: { fontSize: 14, color: '#3A3A3C' },
 
   summaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    boxShadow: '0 4px 20px #00000015',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     marginBottom: 16,
+    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
+    marginHorizontal: 16,
   },
   sumItem: { flex: 1, alignItems: 'center', gap: 3 },
   sumValue: { fontSize: 14, fontWeight: 'bold' },
-  sumLabel: { fontSize: 10, color: '#888' },
-  sumDivider: { width: 1, backgroundColor: '#e5e7eb' },
+  sumLabel: { fontSize: 10, color: '#3A3A3C' },
+  sumDivider: { width: 1, backgroundColor: '#D7DCDC' },
 
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+    marginHorizontal: 16,
   },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#11181C' },
-  sectionCount: { fontSize: 12, color: '#888' },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#1B1B1D' },
+  sectionCount: { fontSize: 12, color: '#3A3A3C' },
 
   emptyBox: { alignItems: 'center', marginTop: 40, gap: 10 },
-  emptyText: { fontSize: 14, color: '#aaa' },
+  emptyText: { fontSize: 14, color: '#3A3A3C' },
+
+  prescriptionThumb: {
+    width: 140,
+    height: 100,
+    borderRadius: 12,
+  },
+  emptyPrescriptionButton: {
+    width: 140,
+    height: 100,
+    borderRadius: 12,
+    backgroundColor: '#D7DCDC',
+    borderWidth: 1,
+    borderColor: '#2F4F4F',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyPrescriptionText: {
+    color: '#1B1B1D',
+    fontWeight: '700',
+    fontSize: 12,
+  },
 
   txCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#d8e0e0',
     borderRadius: 14,
     padding: 12,
     marginBottom: 10,
-    boxShadow: '0 4px 16px #00000012',
     gap: 8,
+    marginHorizontal: 16,
   },
   txTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  txDate: { fontSize: 12, color: '#555', fontWeight: '600' },
+  txDate: { fontSize: 12, color: '#3A3A3C', fontWeight: '600' },
   txInvoice: {
     fontSize: 11,
-    color: '#6366f1',
-    backgroundColor: '#ede9fe',
+    color: '#1B1B1D',
+    backgroundColor: '#D7DCDC',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
@@ -818,14 +1020,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#f4f6f8',
+    backgroundColor: '#D7DCDC',
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  txChipLabel: { fontSize: 11, color: '#888' },
+  txChipLabel: { fontSize: 11, color: '#3A3A3C' },
   txChipValue: { fontSize: 13, fontWeight: 'bold' },
-  txDesc: { fontSize: 12, color: '#777', fontStyle: 'italic' },
+  txDesc: { fontSize: 12, color: '#3A3A3C', fontStyle: 'italic' },
 
   fab: {
     position: 'absolute',
@@ -834,10 +1036,32 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#008080ac',
+    backgroundColor: '#2F4F4F',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 6px 20px #00808055',
+    boxShadow: '0 8px 20px rgba(47, 79, 79, 0.35)',
+  },
+
+  viewerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(27, 27, 29, 0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewerHeader: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 10,
+  },
+  closeText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  viewerImage: {
+    width: '100%',
+    height: '100%',
   },
 
   modalOverlay: { flex: 1, justifyContent: 'flex-start' },
@@ -846,35 +1070,59 @@ const styles = StyleSheet.create({
     backgroundColor: '#00000055',
   },
   modalSheet: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     margin: 10,
+    marginTop: 70,
     borderRadius: 20,
     padding: 20,
-    paddingBottom: 36,
     maxHeight: '90%',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
+  },
+  modalScrollContent: {
+    paddingBottom: 20,
   },
 
   modalLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#555',
+    color: '#3A3A3C',
     marginBottom: 6,
     marginTop: 10,
   },
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  phoneInput: {
+    flex: 1,
+  },
+  contactBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#D7DCDC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
   modalInput: {
-    backgroundColor: '#f4f6f8',
+    backgroundColor: '#EAEDED',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#11181C',
+    color: '#1B1B1D',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
   },
   modalBtns: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   modalTitle: {
     flex: 3,
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#575757',
+    color: '#1B1B1D',
   },
   cancelBtn: {
     flex: 1,
@@ -885,5 +1133,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  saveBtnText: { color: '#008080ff', fontWeight: '400', fontSize: 15 },
+  saveBtnText: { color: '#2F4F4F', fontWeight: '600', fontSize: 15 },
 });

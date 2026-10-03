@@ -151,7 +151,7 @@ export async function generateBackupPDF({ expenses, incomes }) {
         </tfoot>
       </table>
 
-      <div class="page-footer">BusinessWallet — ${year} Annual Report • Generated: ${new Date().toLocaleDateString('en-GB')}</div>
+      <div class="page-footer">BusinessWallet developed by Shahin Mia For Shahin Optical — ${year} Annual Report • Generated: ${new Date().toLocaleDateString('en-GB')}</div>
     </div>`;
   });
 

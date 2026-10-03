@@ -83,7 +83,7 @@ export default function BackupPage() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
-          <Ionicons name='arrow-back' size={22} color='#374151' />
+          <Ionicons name='arrow-back' size={22} color='#1B1B1D' />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Backup & Restore</Text>
         <View style={{ width: 38 }} />
@@ -96,7 +96,7 @@ export default function BackupPage() {
             <MaterialCommunityIcons
               name='cloud-upload-outline'
               size={32}
-              color='#6366f1'
+              color='#2F4F4F'
             />
           </View>
           <Text style={styles.cardTitle}>ডেটা Backup করুন</Text>
@@ -120,11 +120,11 @@ export default function BackupPage() {
 
         {/* Restore Card */}
         <View style={styles.card}>
-          <View style={[styles.cardIcon, { backgroundColor: '#fef3c7' }]}>
+          <View style={[styles.cardIcon, { backgroundColor: '#D7DCDC' }]}>
             <MaterialCommunityIcons
               name='cloud-download-outline'
               size={32}
-              color='#f59e0b'
+              color='#3A3A3C'
             />
           </View>
           <Text style={styles.cardTitle}>ডেটা Restore করুন</Text>
@@ -172,7 +172,7 @@ export default function BackupPage() {
 }
 
 const styles = StyleSheet.create({
-  wrapper: { flex: 1, backgroundColor: '#f8f9fb' },
+  wrapper: { flex: 1, backgroundColor: '#EAEDED' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -182,22 +182,24 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   iconBtn: { padding: 6 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#1B1B1D' },
 
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     borderRadius: 20,
     padding: 20,
     marginHorizontal: 16,
     marginBottom: 14,
     alignItems: 'center',
-    boxShadow: '0 4px 20px #00000012',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
   },
   cardIcon: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#ede9fe',
+    backgroundColor: '#D7DCDC',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
@@ -205,12 +207,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#111827',
+    color: '#1B1B1D',
     marginBottom: 8,
   },
   cardDesc: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#3A3A3C',
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 18,
@@ -225,24 +227,26 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
   },
-  btnPrimary: { backgroundColor: '#6366f1' },
-  btnWarning: { backgroundColor: '#f59e0b' },
-  btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  btnPrimary: { backgroundColor: '#2F4F4F' },
+  btnWarning: { backgroundColor: '#3A3A3C' },
+  btnText: { color: '#EAEDED', fontWeight: '700', fontSize: 15 },
 
   tipsCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     borderRadius: 20,
     padding: 18,
     marginHorizontal: 16,
-    boxShadow: '0 4px 20px #00000012',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
   },
   tipsTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#374151',
+    color: '#1B1B1D',
     marginBottom: 12,
   },
   tipRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  tipDot: { color: '#6366f1', fontWeight: '700', fontSize: 16, marginTop: -1 },
-  tipText: { fontSize: 13, color: '#6b7280', flex: 1, lineHeight: 19 },
+  tipDot: { color: '#2F4F4F', fontWeight: '700', fontSize: 16, marginTop: -1 },
+  tipText: { fontSize: 13, color: '#3A3A3C', flex: 1, lineHeight: 19 },
 });

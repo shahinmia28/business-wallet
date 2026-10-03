@@ -171,7 +171,7 @@ export async function generateStatement({ type, entity, transactions }) {
     </tbody>
   </table>
 
-  <div class="footer">BusinessWallet — Generated on ${new Date().toLocaleString('en-GB')}</div>
+  <div class="footer">BusinessWallet developed by Shahin Mia For Shahin Optical — Generated on ${new Date().toLocaleString('en-GB')}</div>
 
 </body>
 </html>`;

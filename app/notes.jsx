@@ -48,7 +48,7 @@ export default function NotesPage() {
             {item.title || 'শিরোনামহীন'}
           </Text>
           {item.pinned ? (
-            <Ionicons name='bookmark' size={15} color='#f59e0b' />
+            <Ionicons name='bookmark' size={15} color='#2F4F4F' />
           ) : null}
         </View>
         <Text style={styles.noteDate}>{date}</Text>
@@ -61,18 +61,18 @@ export default function NotesPage() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
-          <Ionicons name='arrow-back' size={22} color='#374151' />
+          <Ionicons name='arrow-back' size={22} color='#1B1B1D' />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>নোটস</Text>
         <TouchableOpacity onPress={openNew} style={styles.addBtn}>
-          <Ionicons name='add' size={24} color='#fff' />
+          <Ionicons name='add' size={24} color='#EAEDED' />
         </TouchableOpacity>
       </View>
 
       {/* List */}
       {sorted.length === 0 ? (
         <View style={styles.emptyBox}>
-          <Ionicons name='document-outline' size={54} color='#e5e7eb' />
+          <Ionicons name='document-outline' size={54} color='#D7DCDC' />
           <Text style={styles.emptyText}>কোনো নোট নেই</Text>
         </View>
       ) : (
@@ -109,7 +109,7 @@ export default function NotesPage() {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: '#f8f9fb',
+    backgroundColor: '#EAEDED',
   },
   header: {
     flexDirection: 'row',
@@ -123,21 +123,23 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: '#1B1B1D',
   },
   addBtn: {
-    backgroundColor: '#6366f1',
+    backgroundColor: '#2F4F4F',
     borderRadius: 12,
     padding: 6,
   },
   noteCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
     marginHorizontal: 16,
     marginBottom: 10,
-    boxShadow: '0 4px 16px #00000010',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
   },
   noteCardRow: {
     flexDirection: 'row',
@@ -148,13 +150,13 @@ const styles = StyleSheet.create({
   noteTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: '#1B1B1D',
     flex: 1,
     marginRight: 8,
   },
   noteDate: {
     fontSize: 11,
-    color: '#d1d5db',
+    color: '#3A3A3C',
   },
   emptyBox: {
     flex: 1,
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    color: '#d1d5db',
+    color: '#3A3A3C',
     fontWeight: '600',
   },
 });

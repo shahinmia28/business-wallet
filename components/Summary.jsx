@@ -37,7 +37,7 @@ export default function Summary() {
         onPress={() => router.push('/report')}
       >
         <View style={styles.reportIcon}>
-          <MaterialCommunityIcons name='chart-bar' size={32} color='#4338ca' />
+          <MaterialCommunityIcons name='chart-bar' size={32} color='#1B1B1D' />
         </View>
         <Text style={styles.reportText}>Reports</Text>
       </TouchableOpacity>
@@ -61,22 +61,22 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
 
-  /* -------- Reports -------- */
   reportCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#EAEDED',
     borderRadius: 22,
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 6px 30px #00000022',
+
+    boxShadow: '0 10px 24px rgba(27, 27, 29, 0.08)',
   },
 
   reportIcon: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#eef2ff',
+    backgroundColor: '#EAEDED',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   reportText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#4338ca',
+    color: '#1B1B1D',
   },
   SummaryBoxes: {
     flex: 2,

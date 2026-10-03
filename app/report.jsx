@@ -29,29 +29,29 @@ export default function Report() {
 
   const monthlyIncomes = useMemo(
     () => filterByMonth(incomes),
-    [incomes, selectedMonth]
+    [incomes, selectedMonth],
   );
 
   const monthlyExpenses = useMemo(
     () => filterByMonth(expenses),
-    [expenses, selectedMonth]
+    [expenses, selectedMonth],
   );
 
   /* ================= TOTALS ================= */
 
   const totalSell = monthlyIncomes.reduce(
     (s, i) => s + Number(i.selAmount || 0),
-    0
+    0,
   );
 
   const totalProfit = monthlyIncomes.reduce(
     (s, i) => s + Number(i.amount || 0),
-    0
+    0,
   );
 
   const totalExpense = monthlyExpenses.reduce(
     (s, i) => s + Number(i.amount || 0),
-    0
+    0,
   );
   const totalBalance = totalProfit - totalExpense;
 
@@ -70,7 +70,7 @@ export default function Report() {
 
   const expenseData = useMemo(
     () => summarize(monthlyExpenses),
-    [monthlyExpenses]
+    [monthlyExpenses],
   );
 
   return (
@@ -78,14 +78,18 @@ export default function Report() {
       {/* ===== TOP BAR ===== */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => router.push('/')}>
-          <Feather name='arrow-left' size={22} />
+          <Feather name='arrow-left' size={22} color='#1B1B1D' />
         </TouchableOpacity>
 
         <View style={styles.monthSelector}>
           <TouchableOpacity
+            style={{
+              padding: 10,
+              borderRadius: 20,
+            }}
             onPress={() => setSelectedMonth(selectedMonth.subtract(1, 'month'))}
           >
-            <Feather name='chevron-left' size={18} />
+            <Feather name='chevron-left' size={25} color='#1B1B1D' />
           </TouchableOpacity>
 
           <Text style={styles.monthText}>
@@ -93,9 +97,13 @@ export default function Report() {
           </Text>
 
           <TouchableOpacity
+            style={{
+              padding: 10,
+              borderRadius: 50,
+            }}
             onPress={() => setSelectedMonth(selectedMonth.add(1, 'month'))}
           >
-            <Feather name='chevron-right' size={18} />
+            <Feather name='chevron-right' size={25} color='#1B1B1D' />
           </TouchableOpacity>
         </View>
 
@@ -124,7 +132,7 @@ export default function Report() {
                 styles.progressFill,
                 {
                   width: `${profitPercent}%`,
-                  backgroundColor: '#16a34a',
+                  backgroundColor: '#2F4F4F',
                 },
               ]}
             />
@@ -147,7 +155,7 @@ export default function Report() {
                 styles.progressFill,
                 {
                   width: `${expensePercent}%`,
-                  backgroundColor: '#dc2626',
+                  backgroundColor: '#3A3A3C',
                 },
               ]}
             />
@@ -170,7 +178,7 @@ export default function Report() {
                 styles.progressFill,
                 {
                   width: `${balancePercent}%`,
-                  backgroundColor: '#008080c7',
+                  backgroundColor: '#2F4F4F',
                 },
               ]}
             />
@@ -246,14 +254,15 @@ function HorizontalBar({ name, amount, percent, color }) {
 
 /* ================= COLORS ================= */
 
-const EXPENSE_COLORS = ['#dc2626', '#ef4444', '#f87171', '#fecaca', '#ffd9d9'];
+const EXPENSE_COLORS = ['#2F4F4F', '#3A3A3C', '#1B1B1D', '#EAEDED', '#D7DCDC'];
 
 /* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     padding: 16,
+    paddingTop: 0,
     height: '100%',
   },
 
@@ -267,19 +276,19 @@ const styles = StyleSheet.create({
   monthSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e5e7eb',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    justifyContent: 'space-between',
+    backgroundColor: '#D7DCDC',
     borderRadius: 20,
   },
 
   monthText: {
-    marginHorizontal: 8,
+    marginHorizontal: 40,
+    marginVertical: 6,
     fontWeight: '700',
   },
 
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 16,
     marginBottom: 16,
@@ -288,14 +297,14 @@ const styles = StyleSheet.create({
   totalSellBig: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#2563eb',
+    color: '#2F4F4F',
     textAlign: 'center',
     marginTop: 6,
   },
 
   subLabel: {
     textAlign: 'center',
-    color: '#6b7280',
+    color: '#3A3A3C',
     fontWeight: '600',
     marginTop: 2,
   },
@@ -303,12 +312,12 @@ const styles = StyleSheet.create({
   amountText: {
     fontWeight: '700',
     marginTop: 6,
-    color: '#111827',
+    color: '#1B1B1D',
   },
 
   helperText: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#3A3A3C',
     marginTop: 2,
   },
 
@@ -318,12 +327,12 @@ const styles = StyleSheet.create({
 
   profitText: {
     fontWeight: '700',
-    color: '#16a34a',
+    color: '#2F4F4F',
   },
 
   expenseText: {
     fontWeight: '700',
-    color: '#dc2626',
+    color: '#1B1B1D',
   },
 
   sectionTitle: {
@@ -334,20 +343,8 @@ const styles = StyleSheet.create({
 
   sellText: {
     fontWeight: '700',
-    color: '#2563eb',
+    color: '#2F4F4F',
     marginBottom: 4,
-  },
-
-  profitText: {
-    fontWeight: '700',
-    color: '#16a34a',
-    marginBottom: 4,
-  },
-
-  expenseText: {
-    fontWeight: '700',
-    color: '#dc2626',
-    marginBottom: 10,
   },
 
   percentLabel: {
@@ -367,18 +364,18 @@ const styles = StyleSheet.create({
 
   reason: {
     fontWeight: '600',
-    color: '#374151',
+    color: '#3A3A3C',
   },
 
   value: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: '#3A3A3C',
   },
 
   progressBg: {
     height: 10,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#D7DCDC',
     borderRadius: 10,
     overflow: 'hidden',
   },
@@ -389,6 +386,6 @@ const styles = StyleSheet.create({
   },
   balanceText: {
     fontWeight: '700',
-    color: '#008080c7', // Teal for balance
+    color: '#2F4F4F',
   },
 });

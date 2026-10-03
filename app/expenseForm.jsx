@@ -41,8 +41,8 @@ export default function ExpenseForm() {
 
   useEffect(() => setSelectedDate(new Date()), []);
 
-  const expenseCategories = ['বাজার', 'বিল', 'ভাড়া', 'ঔষধ'];
-
+  const expenseCategories1 = ['বাজার', 'ঔষধ', 'বিদ্যুৎ', 'মোবাইল'];
+  const expenseCategories2 = ['ভাড়া', 'শিক্ষা', 'পোশাক', 'গ্যাস'];
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -62,9 +62,9 @@ export default function ExpenseForm() {
           placeholder='ব্যয় কিভাবে হয়েছে ?'
         />
 
-        {/* Icon Buttons */}
+        {/* Icon Buttons 1*/}
         <View style={styles.iconRow}>
-          {expenseCategories.map((item) => (
+          {expenseCategories1.map((item) => (
             <TouchableOpacity
               key={item}
               style={[
@@ -73,11 +73,25 @@ export default function ExpenseForm() {
               ]}
               onPress={() => setReason(item)}
             >
-              <Text style={{ color: '#5f5f5f' }}>{item}</Text>
+              <Text style={{ color: '#3A3A3C' }}>{item}</Text>
             </TouchableOpacity>
           ))}
         </View>
-
+        {/* Icon Buttons 2 */}
+        <View style={styles.iconRow}>
+          {expenseCategories2.map((item) => (
+            <TouchableOpacity
+              key={item}
+              style={[
+                styles.iconButton,
+                reason === item && styles.selectedIconButton,
+              ]}
+              onPress={() => setReason(item)}
+            >
+              <Text style={{ color: '#3A3A3C' }}>{item}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         {/* Amount */}
         <TextInput
           style={styles.input}
@@ -93,7 +107,7 @@ export default function ExpenseForm() {
           style={styles.input}
           onPress={() => setShowPicker(true)}
         >
-          <Text style={{ color: '#5f5f5f' }}>{BDDateTime(selectedDate)}</Text>
+          <Text style={{ color: '#3A3A3C' }}>{BDDateTime(selectedDate)}</Text>
         </TouchableOpacity>
 
         {showPicker && (
@@ -130,7 +144,7 @@ export default function ExpenseForm() {
         style={styles.calcFloatBtn}
         onPress={() => setShowCalc(true)}
       >
-        <FontAwesome name='calculator' size={35} color='#ff8000' />
+        <FontAwesome name='calculator' size={35} color='#2F4F4F' />
       </TouchableOpacity>
 
       {/* Calculator Modal */}
@@ -154,14 +168,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 16,
-    color: '#ef4444',
+    color: '#2F4F4F',
   },
   input: {
-    backgroundColor: '#ffffff',
-    boxShadow: '0 6px 30px #00000022',
+    backgroundColor: '#EAEDED',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
+    borderWidth: 0.5,
+    borderColor: '#D7DCDC',
   },
 
   iconRow: {
@@ -174,10 +190,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 10,
-    boxShadow: '0 6px 30px #00000022',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     borderRadius: 12,
+    backgroundColor: '#EAEDED',
+    borderWidth: 0.5,
+    borderColor: '#D7DCDC',
   },
-  selectedIconButton: { backgroundColor: '#fd2c2c19' },
+  selectedIconButton: { backgroundColor: '#D7DCDC' },
 
   buttonRow: {
     flexDirection: 'row',
@@ -192,18 +211,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
 
-  backButton: { backgroundColor: '#374151' },
-  submitButton: { backgroundColor: '#ef4444' },
-  buttonText: { color: 'white', fontWeight: 'bold' },
+  backButton: { backgroundColor: '#3A3A3C' },
+  submitButton: { backgroundColor: '#2F4F4F' },
+  buttonText: { color: '#EAEDED', fontWeight: 'bold' },
   calcFloatBtn: {
     position: 'absolute',
     bottom: 100,
     right: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#EAEDED',
     padding: 16,
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0 2px 20px #00000022',
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
   },
 });

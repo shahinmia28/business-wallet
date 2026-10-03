@@ -193,7 +193,7 @@ export default function NoteEditor({
         {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleClose} style={styles.iconBtn}>
-            <Ionicons name='arrow-back' size={22} color='#374151' />
+            <Ionicons name='arrow-back' size={22} color='#1B1B1D' />
           </TouchableOpacity>
           {/* tool bar */}
           <View style={styles.toolbar}>
@@ -205,7 +205,7 @@ export default function NoteEditor({
               <MaterialCommunityIcons
                 name='undo'
                 size={22}
-                color={undoStack.current.length ? '#374151' : '#d1d5db'}
+                color={undoStack.current.length ? '#1B1B1D' : '#D7DCDC'}
               />
             </TouchableOpacity>
 
@@ -217,7 +217,7 @@ export default function NoteEditor({
               <MaterialCommunityIcons
                 name='redo'
                 size={22}
-                color={redoStack.current.length ? '#374151' : '#d1d5db'}
+                color={redoStack.current.length ? '#1B1B1D' : '#D7DCDC'}
               />
             </TouchableOpacity>
 
@@ -231,7 +231,7 @@ export default function NoteEditor({
               <MaterialCommunityIcons
                 name='format-text'
                 size={22}
-                color={listMode === null ? '#6366f1' : '#374151'}
+                color={listMode === null ? '#2F4F4F' : '#3A3A3C'}
               />
             </TouchableOpacity>
 
@@ -245,7 +245,7 @@ export default function NoteEditor({
               <MaterialCommunityIcons
                 name='format-list-numbered'
                 size={22}
-                color={listMode === 'number' ? '#6366f1' : '#374151'}
+                color={listMode === 'number' ? '#2F4F4F' : '#3A3A3C'}
               />
             </TouchableOpacity>
           </View>
@@ -257,7 +257,7 @@ export default function NoteEditor({
               <Ionicons
                 name={pinned ? 'bookmark' : 'bookmark-outline'}
                 size={22}
-                color={pinned ? '#f59e0b' : '#9ca3af'}
+                color={pinned ? '#2F4F4F' : '#3A3A3C'}
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleSave} style={styles.saveBtn}>
@@ -266,7 +266,7 @@ export default function NoteEditor({
             </TouchableOpacity>
             {note?.id && (
               <TouchableOpacity onPress={confirmDelete} style={styles.iconBtn}>
-                <Ionicons name='trash-outline' size={20} color='#ef4444' />
+                <Ionicons name='trash-outline' size={20} color='#1B1B1D' />
               </TouchableOpacity>
             )}
           </View>
@@ -276,7 +276,7 @@ export default function NoteEditor({
         <TextInput
           style={styles.titleInput}
           placeholder='শিরোনাম...'
-          placeholderTextColor='#d1d5db'
+          placeholderTextColor='#D7DCDC'
           value={title}
           onChangeText={setTitle}
           multiline
@@ -288,7 +288,7 @@ export default function NoteEditor({
         <TextInput
           style={styles.contentInput}
           placeholder='লিখুন...'
-          placeholderTextColor='#d1d5db'
+          placeholderTextColor='#D7DCDC'
           multiline
           value={content}
           onChangeText={handleContentChange}
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#6366f1',
+    backgroundColor: '#2F4F4F',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
@@ -335,13 +335,13 @@ const styles = StyleSheet.create({
   titleInput: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827',
+    color: '#1B1B1D',
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   divider: {
     height: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#D7DCDC',
     marginHorizontal: 20,
     marginBottom: 4,
   },

@@ -1,4 +1,8 @@
 import * as SQLite from 'expo-sqlite';
+import {
+  deletePrescriptionImage,
+  deleteProfileImage,
+} from '../utils/customerPrescription';
 
 const db = SQLite.openDatabaseSync('dailyExpense.db');
 
@@ -61,6 +65,7 @@ export const initDB = async () => {
       phone TEXT,
       address TEXT,
       note TEXT,
+      profileImagePath TEXT,
       createdAt TEXT
     );
   `,
@@ -106,6 +111,10 @@ export const initDB = async () => {
       `,
     },
     {
+      name: 'add_suppliers_profile_image_path_column',
+      query: `ALTER TABLE suppliers ADD COLUMN profileImagePath TEXT;`,
+    },
+    {
       // Delete না করে Hide/Show করার জন্য
       name: 'add_suppliers_isActive_column',
       query: `ALTER TABLE suppliers ADD COLUMN isActive INTEGER DEFAULT 1;`,
@@ -124,6 +133,8 @@ export const initDB = async () => {
           phone TEXT,
           address TEXT,
           note TEXT,
+          profileImagePath TEXT,
+          prescriptionPhotoPath TEXT,
           isActive INTEGER DEFAULT 1,
           createdAt TEXT
         );
@@ -136,6 +147,14 @@ export const initDB = async () => {
         ON customers(phone)
         WHERE phone IS NOT NULL AND TRIM(phone) <> '';
       `,
+    },
+    {
+      name: 'add_customers_profile_image_path_column',
+      query: `ALTER TABLE customers ADD COLUMN profileImagePath TEXT;`,
+    },
+    {
+      name: 'add_customers_prescription_photo_path_column',
+      query: `ALTER TABLE customers ADD COLUMN prescriptionPhotoPath TEXT;`,
     },
     {
       name: 'create_customer_transactions_table',
@@ -256,6 +275,7 @@ export const insertSupplier = async ({
   phone,
   address,
   note,
+  profileImagePath,
   createdAt,
 }) => {
   if (!createdAt) {
@@ -270,9 +290,9 @@ export const insertSupplier = async ({
   try {
     return await db.runAsync(
       `INSERT INTO suppliers
-      (name,phone,address,note,createdAt,isActive)
-      VALUES (?,?,?,?,?,1)`,
-      [name, phone, address, note, createdAt],
+      (name,phone,address,note,profileImagePath,createdAt,isActive)
+      VALUES (?,?,?,?,?, ?,1)`,
+      [name, phone, address, note, profileImagePath ?? null, createdAt],
     );
   } catch (e) {
     if (e.message && e.message.includes('UNIQUE')) {
@@ -282,7 +302,14 @@ export const insertSupplier = async ({
   }
 };
 
-export const updateSupplier = async ({ id, name, phone, address, note }) => {
+export const updateSupplier = async ({
+  id,
+  name,
+  phone,
+  address,
+  note,
+  profileImagePath,
+}) => {
   if (phone && phone.trim()) {
     const existing = await getSupplierByPhone(phone);
     if (existing && existing.id !== id) {
@@ -290,6 +317,20 @@ export const updateSupplier = async ({ id, name, phone, address, note }) => {
     }
   }
   try {
+    if (profileImagePath !== undefined) {
+      return await db.runAsync(
+        `UPDATE suppliers
+         SET
+         name=?,
+         phone=?,
+         address=?,
+         note=?,
+         profileImagePath=?
+         WHERE id=?`,
+        [name, phone, address, note, profileImagePath ?? null, id],
+      );
+    }
+
     return await db.runAsync(
       `UPDATE suppliers
        SET
@@ -308,8 +349,13 @@ export const updateSupplier = async ({ id, name, phone, address, note }) => {
   }
 };
 
-export const deleteSupplier = async (id) =>
+export const deleteSupplier = async (id) => {
+  const supplier = await getSupplierById(id);
+  if (supplier?.profileImagePath) {
+    await deleteProfileImage(supplier.profileImagePath);
+  }
   await db.runAsync(`DELETE FROM suppliers WHERE id=?`, [id]);
+};
 
 // Delete না করে শুধু Hide করার জন্য (isActive=0)
 export const deactivateSupplier = async (id) =>
@@ -563,6 +609,8 @@ export const insertCustomer = async ({
   address,
   note,
   createdAt,
+  profileImagePath,
+  prescriptionPhotoPath,
 }) => {
   if (!createdAt) throw new Error('createdAt আবশ্যক');
   if (phone && phone.trim()) {
@@ -572,8 +620,16 @@ export const insertCustomer = async ({
   }
   try {
     return await db.runAsync(
-      `INSERT INTO customers (name,phone,address,note,createdAt,isActive) VALUES (?,?,?,?,?,1)`,
-      [name, phone, address, note, createdAt],
+      `INSERT INTO customers (name,phone,address,note,profileImagePath,prescriptionPhotoPath,createdAt,isActive) VALUES (?,?,?,?,?,?,?,1)`,
+      [
+        name,
+        phone,
+        address,
+        note,
+        profileImagePath ?? null,
+        prescriptionPhotoPath ?? null,
+        createdAt,
+      ],
     );
   } catch (e) {
     if (e.message?.includes('UNIQUE'))
@@ -582,13 +638,37 @@ export const insertCustomer = async ({
   }
 };
 
-export const updateCustomer = async ({ id, name, phone, address, note }) => {
+export const updateCustomer = async ({
+  id,
+  name,
+  phone,
+  address,
+  note,
+  profileImagePath,
+  prescriptionPhotoPath,
+}) => {
   if (phone && phone.trim()) {
     const existing = await getCustomerByPhone(phone);
     if (existing && existing.id !== id)
       throw new Error('এই ফোন নম্বর দিয়ে আগে থেকেই একজন কাস্টমার আছে');
   }
   try {
+    if (profileImagePath !== undefined || prescriptionPhotoPath !== undefined) {
+      const current = await getCustomerById(id);
+      return await db.runAsync(
+        `UPDATE customers SET name=?, phone=?, address=?, note=?, profileImagePath=?, prescriptionPhotoPath=? WHERE id=?`,
+        [
+          name,
+          phone,
+          address,
+          note,
+          profileImagePath ?? current?.profileImagePath ?? null,
+          prescriptionPhotoPath ?? current?.prescriptionPhotoPath ?? null,
+          id,
+        ],
+      );
+    }
+
     return await db.runAsync(
       `UPDATE customers SET name=?, phone=?, address=?, note=? WHERE id=?`,
       [name, phone, address, note, id],
@@ -600,8 +680,16 @@ export const updateCustomer = async ({ id, name, phone, address, note }) => {
   }
 };
 
-export const deleteCustomer = async (id) =>
+export const deleteCustomer = async (id) => {
+  const customer = await getCustomerById(id);
+  if (customer?.profileImagePath) {
+    await deleteProfileImage(customer.profileImagePath);
+  }
+  if (customer?.prescriptionPhotoPath) {
+    await deletePrescriptionImage(customer.prescriptionPhotoPath);
+  }
   await db.runAsync(`DELETE FROM customers WHERE id=?`, [id]);
+};
 
 export const deactivateCustomer = async (id) =>
   await db.runAsync(`UPDATE customers SET isActive=0 WHERE id=?`, [id]);

@@ -12,8 +12,8 @@ export default function FormButton() {
         style={styles.button}
         onPress={() => router.push('/incomeForm')}
       >
-        <Ionicons name='trending-up' size={28} color='#14b8a6' />
-        <Text style={[styles.label, { color: '#14b8a6' }]}>আয়</Text>
+        <Ionicons name='trending-up' size={28} color='#2F4F4F' />
+        <Text style={[styles.label, { color: '#3A3A3C' }]}>আয়</Text>
       </TouchableOpacity>
 
       {/* Expense */}
@@ -21,8 +21,8 @@ export default function FormButton() {
         style={styles.button}
         onPress={() => router.push('/expenseForm')}
       >
-        <Ionicons name='trending-down' size={28} color='#ef4444' />
-        <Text style={[styles.label, { color: '#ef4444' }]}>ব্যয়</Text>
+        <Ionicons name='trending-down' size={28} color='#b6031b' />
+        <Text style={[styles.label, { color: '#3A3A3C' }]}>ব্যয়</Text>
       </TouchableOpacity>
     </View>
   );
@@ -41,12 +41,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
-    boxShadow: '0 6px 30px #00000022',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#EAEDED',
+
+    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
   },
   label: {
-    fontWeight: 'bold',
+    fontWeight: 'semi-bold',
     fontSize: 18,
     marginTop: 4,
   },

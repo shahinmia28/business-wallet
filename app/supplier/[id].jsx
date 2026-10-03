@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Linking,
   Modal,
@@ -16,9 +17,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import PrescriptionPhotoPicker from '../../components/PrescriptionPhotoPicker';
 import {
   deleteSupplier,
   deleteSupplierTransaction,
@@ -29,6 +32,11 @@ import {
   updateSupplierTransaction,
 } from '../../database/db';
 import BDDateTime from '../../utils/BDDateTime';
+import { pickPhoneFromContacts } from '../../utils/contactPicker';
+import {
+  deleteProfileImage,
+  saveProfileImage,
+} from '../../utils/customerPrescription';
 import {
   generateStatement,
   shareStatement,
@@ -49,9 +57,10 @@ export default function SupplierDetail() {
   const [txModal, setTxModal] = useState(false);
   const [editTx, setEditTx] = useState(null); // null = add, obj = edit
   const [editSupplierModal, setEditSupplierModal] = useState(false);
+  const [profileViewerVisible, setProfileViewerVisible] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [s, txs] = await Promise.all([
@@ -65,12 +74,12 @@ export default function SupplierDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [id]),
+    }, [loadData]),
   );
 
   const handleCall = async (phone) => {
@@ -151,7 +160,7 @@ export default function SupplierDetail() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size='large' color='#008080ac' />
+        <ActivityIndicator size='large' color='#2F4F4F' />
       </View>
     );
   }
@@ -159,7 +168,7 @@ export default function SupplierDetail() {
   if (!supplier) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: '#888' }}>সাপ্লায়ার পাওয়া যায়নি</Text>
+        <Text style={{ color: '#3A3A3C' }}>সাপ্লায়ার পাওয়া যায়নি</Text>
       </View>
     );
   }
@@ -169,7 +178,7 @@ export default function SupplierDetail() {
       {/* ── Header ── */}
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name='arrow-back' size={24} color='#11181C' />
+          <Ionicons name='arrow-back' size={24} color='#1B1B1D' />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {supplier.name}
@@ -179,20 +188,20 @@ export default function SupplierDetail() {
             onPress={() => setEditSupplierModal(true)}
             style={styles.iconBtn}
           >
-            <Ionicons name='create-outline' size={22} color='#008080' />
+            <Ionicons name='create-outline' size={22} color='#2F4F4F' />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleStatement}
             style={[styles.iconBtn, generating && { opacity: 0.5 }]}
             disabled={generating}
           >
-            <Ionicons name='share-outline' size={22} color='#6366f1' />
+            <Ionicons name='share-outline' size={22} color='#3A3A3C' />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleDeleteSupplier}
             style={styles.iconBtn}
           >
-            <Ionicons name='trash-outline' size={22} color='#ef4444' />
+            <Ionicons name='trash-outline' size={22} color='#1B1B1D' />
           </TouchableOpacity>
         </View>
       </View>
@@ -203,23 +212,37 @@ export default function SupplierDetail() {
       >
         {/* ── Info Card ── */}
         <View style={styles.infoCard}>
-          <View style={styles.avatarLarge}>
-            <Text style={styles.avatarLargeText}>
-              {supplier.name.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+          {supplier.profileImagePath ? (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setProfileViewerVisible(true)}
+              style={styles.avatarLarge}
+            >
+              <Image
+                source={{ uri: supplier.profileImagePath }}
+                style={styles.avatarImage}
+                resizeMode='cover'
+              />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.avatarLarge}>
+              <Text style={styles.avatarLargeText}>
+                {supplier.name.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
           <View style={styles.infoRows}>
             {supplier.phone ? (
               <Pressable
                 onPress={() => handleCall(supplier.phone)}
-                android_ripple={{ color: '#DCFCE7' }}
+                android_ripple={{ color: '#dfe3e3' }}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  backgroundColor: '#F0FDF4',
+                  backgroundColor: '#dfe3e3',
                   borderWidth: 1,
-                  borderColor: '#86EFAC',
+                  borderColor: '#2F4F4F',
                   borderRadius: 12,
                   paddingHorizontal: 12,
                   paddingVertical: 10,
@@ -231,16 +254,16 @@ export default function SupplierDetail() {
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: '#22C55E',
+                    backgroundColor: '#2F4F4F',
                     paddingHorizontal: 10,
                     paddingVertical: 6,
                     borderRadius: 20,
                   }}
                 >
-                  <Ionicons name='call' size={16} color='#fff' />
+                  <Ionicons name='call' size={16} color='#EAEDED' />
                   <Text
                     style={{
-                      color: '#fff',
+                      color: '#EAEDED',
                       fontWeight: '700',
                       marginLeft: 5,
                       fontSize: 13,
@@ -268,19 +291,19 @@ export default function SupplierDetail() {
           <SumItem
             label='মোট ক্রয়'
             value={fmt(supplier.totalPurchase)}
-            color='#ef4444'
+            color='#2F4F4F'
           />
           <View style={styles.sumDivider} />
           <SumItem
             label='পেমেন্ট'
             value={fmt(supplier.totalPayment)}
-            color='#14b8a6'
+            color='#3A3A3C'
           />
           <View style={styles.sumDivider} />
           <SumItem
             label='বাকি'
             value={fmt(supplier.due)}
-            color={supplier.due > 0 ? '#f59e0b' : '#14b8a6'}
+            color={supplier.due > 0 ? '#3A3A3C' : '#2F4F4F'}
           />
         </View>
 
@@ -325,6 +348,14 @@ export default function SupplierDetail() {
         <Ionicons name='add' size={28} color='#fff' />
       </TouchableOpacity>
 
+      {supplier.profileImagePath ? (
+        <PrescriptionViewer
+          visible={profileViewerVisible}
+          imageUri={supplier.profileImagePath}
+          onClose={() => setProfileViewerVisible(false)}
+        />
+      ) : null}
+
       {/* ── Transaction Modal ── */}
       <TxModal
         visible={txModal}
@@ -356,6 +387,43 @@ export default function SupplierDetail() {
 }
 
 /* ═══════════════════════════════════════════════
+   FULL SCREEN IMAGE VIEWER
+═══════════════════════════════════════════════ */
+function PrescriptionViewer({ visible, imageUri, onClose }) {
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  return (
+    <Modal
+      transparent
+      visible={visible}
+      animationType='fade'
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <View style={styles.viewerOverlay}>
+        {/* Backdrop - ট্যাপ করলে বন্ধ */}
+        <Pressable style={styles.viewerBackdrop} onPress={onClose} />
+
+        <Image
+          source={{ uri: imageUri }}
+          style={{ width: screenWidth, height: screenHeight * 0.8 }}
+          resizeMode='contain'
+        />
+
+        <View style={styles.viewerHeader}>
+          <TouchableOpacity
+            onPress={onClose}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.closeText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+/* ═══════════════════════════════════════════════
    TX CARD
 ═══════════════════════════════════════════════ */
 function TxCard({ tx, onEdit, onDelete }) {
@@ -372,10 +440,10 @@ function TxCard({ tx, onEdit, onDelete }) {
         ) : null}
         <View style={styles.txActions}>
           <TouchableOpacity onPress={onEdit} style={styles.txBtn}>
-            <Ionicons name='create-outline' size={16} color='#008080' />
+            <Ionicons name='create-outline' size={16} color='#2F4F4F' />
           </TouchableOpacity>
           <TouchableOpacity onPress={onDelete} style={styles.txBtn}>
-            <Ionicons name='trash-outline' size={16} color='#ef4444' />
+            <Ionicons name='trash-outline' size={16} color='#1B1B1D' />
           </TouchableOpacity>
         </View>
       </View>
@@ -385,7 +453,7 @@ function TxCard({ tx, onEdit, onDelete }) {
         {tx.purchase > 0 && (
           <View style={styles.txChip}>
             <Text style={styles.txChipLabel}>ক্রয়</Text>
-            <Text style={[styles.txChipValue, { color: '#ef4444' }]}>
+            <Text style={[styles.txChipValue, { color: '#2F4F4F' }]}>
               {fmt(tx.purchase)}
             </Text>
           </View>
@@ -393,7 +461,7 @@ function TxCard({ tx, onEdit, onDelete }) {
         {tx.payment > 0 && (
           <View style={styles.txChip}>
             <Text style={styles.txChipLabel}>পেমেন্ট</Text>
-            <Text style={[styles.txChipValue, { color: '#14b8a6' }]}>
+            <Text style={[styles.txChipValue, { color: '#3A3A3C' }]}>
               {fmt(tx.payment)}
             </Text>
           </View>
@@ -532,7 +600,7 @@ function TxModal({ visible, supplierId, editData, onClose, onSaved }) {
               style={styles.modalInput}
               onPress={() => setShowPicker(true)}
             >
-              <Text style={{ color: '#5f5f5f' }}>
+              <Text style={{ color: '#3A3A3C' }}>
                 {BDDateTime(selectedDate)}
               </Text>
             </TouchableOpacity>
@@ -600,13 +668,31 @@ function EditSupplierModal({ visible, supplier, onClose, onSaved }) {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [note, setNote] = useState('');
+  const [profileImageUri, setProfileImageUri] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  const handleSelectContact = async () => {
+    const selected = await pickPhoneFromContacts({
+      currentName: name,
+      currentPhone: phone,
+    });
+    if (!selected) return;
+
+    if (!name.trim() && selected.name) {
+      setName(selected.name.trim());
+    }
+
+    if (selected.phone) {
+      setPhone(selected.phone);
+    }
+  };
 
   const onShow = () => {
     setName(supplier?.name || '');
     setPhone(supplier?.phone || '');
     setAddress(supplier?.address || '');
     setNote(supplier?.note || '');
+    setProfileImageUri(supplier?.profileImagePath || null);
   };
 
   const handleSave = async () => {
@@ -616,12 +702,29 @@ function EditSupplierModal({ visible, supplier, onClose, onSaved }) {
     }
     setSaving(true);
     try {
+      let finalProfilePath = supplier?.profileImagePath || null;
+
+      if (profileImageUri && profileImageUri !== supplier?.profileImagePath) {
+        finalProfilePath = await saveProfileImage({
+          uri: profileImageUri,
+          ownerId: supplier.id,
+          ownerType: 'supplier',
+          previousPath: supplier?.profileImagePath || null,
+        });
+      }
+
+      if (!profileImageUri && supplier?.profileImagePath) {
+        await deleteProfileImage(supplier.profileImagePath);
+        finalProfilePath = null;
+      }
+
       await updateSupplier({
         id: supplier.id,
         name: name.trim(),
         phone: phone.trim(),
         address: address.trim(),
         note: note.trim(),
+        profileImagePath: finalProfilePath,
       });
       Toast.show({ type: 'success', text1: 'আপডেট হয়েছে' });
       onSaved();
@@ -650,57 +753,79 @@ function EditSupplierModal({ visible, supplier, onClose, onSaved }) {
           onPress={onClose}
         />
         <View style={styles.modalSheet}>
-          <View style={styles.modalBtns}>
-            <Text style={styles.modalTitle}>Edit Supplier</Text>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.saveBtn, saving && { opacity: 0.6 }]}
-              onPress={handleSave}
-              disabled={saving}
-            >
-              <Text style={styles.saveBtnText}>
-                {saving ? 'Saving...' : 'Save'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.modalLabel}>নাম *</Text>
-          <TextInput
-            style={styles.modalInput}
-            value={name}
-            onChangeText={setName}
-            placeholder='সাপ্লায়ারের নাম'
-          />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.modalScrollContent}
+          >
+            <View style={styles.modalBtns}>
+              <Text style={styles.modalTitle}>Edit Supplier</Text>
+              <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+                onPress={handleSave}
+                disabled={saving}
+              >
+                <Text style={styles.saveBtnText}>
+                  {saving ? 'Saving...' : 'Save'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalLabel}>নাম *</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={name}
+              onChangeText={setName}
+              placeholder='সাপ্লায়ারের নাম'
+            />
 
-          <Text style={styles.modalLabel}>ফোন</Text>
-          <TextInput
-            style={styles.modalInput}
-            value={phone}
-            onChangeText={setPhone}
-            placeholder='01XXXXXXXXX'
-            keyboardType='phone-pad'
-          />
+            <Text style={styles.modalLabel}>ফোন</Text>
+            <View style={styles.phoneRow}>
+              <TextInput
+                style={[styles.modalInput, styles.phoneInput]}
+                value={phone}
+                onChangeText={setPhone}
+                placeholder='01XXXXXXXXX'
+                keyboardType='phone-pad'
+              />
+              <TouchableOpacity
+                style={styles.contactBtn}
+                onPress={handleSelectContact}
+                accessibilityLabel='Select phone number from contacts'
+              >
+                <Ionicons name='person-add-outline' size={20} color='#2F4F4F' />
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styles.modalLabel}>ঠিকানা</Text>
-          <TextInput
-            style={styles.modalInput}
-            value={address}
-            onChangeText={setAddress}
-            placeholder='ঠিকানা'
-          />
+            <Text style={styles.modalLabel}>ঠিকানা</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={address}
+              onChangeText={setAddress}
+              placeholder='ঠিকানা'
+            />
 
-          <Text style={styles.modalLabel}>নোট</Text>
-          <TextInput
-            style={[
-              styles.modalInput,
-              { minHeight: 60, textAlignVertical: 'top' },
-            ]}
-            value={note}
-            onChangeText={setNote}
-            placeholder='নোট (ঐচ্ছিক)'
-            multiline
-          />
+            <Text style={styles.modalLabel}>নোট</Text>
+            <TextInput
+              style={[
+                styles.modalInput,
+                { minHeight: 60, textAlignVertical: 'top' },
+              ]}
+              value={note}
+              onChangeText={setNote}
+              placeholder='নোট (ঐচ্ছিক)'
+              multiline
+            />
+
+            <Text style={styles.modalLabel}>Profile Image</Text>
+            <PrescriptionPhotoPicker
+              value={profileImageUri}
+              onChange={setProfileImageUri}
+              label='Profile Image'
+              variant='avatar'
+            />
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -732,7 +857,7 @@ function SumItem({ label, value, color }) {
    STYLES
 ═══════════════════════════════════════════════ */
 const styles = StyleSheet.create({
-  wrapper: { flex: 1, backgroundColor: '#f4f6f8', paddingHorizontal: 16 },
+  wrapper: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
   /* Header */
@@ -742,55 +867,86 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 50,
     marginBottom: 16,
+    marginHorizontal: 16,
   },
   backBtn: { padding: 4 },
   headerTitle: {
     flex: 1,
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#11181C',
+    color: '#1B1B1D',
     marginHorizontal: 8,
   },
   headerActions: { flexDirection: 'row', gap: 6 },
-  iconBtn: { padding: 6, borderRadius: 10, backgroundColor: '#f4f6f8' },
+  iconBtn: { padding: 6, borderRadius: 10, backgroundColor: '#EAEDED' },
 
   /* Info Card */
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     borderRadius: 20,
     padding: 16,
-    boxShadow: '0 6px 30px #00000022',
+    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginBottom: 12,
     alignItems: 'center',
     gap: 12,
+    marginHorizontal: 16,
+    marginTop: 8,
   },
   avatarLarge: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#e0f2f1',
+    backgroundColor: '#D7DCDC',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  avatarLargeText: { fontSize: 26, fontWeight: 'bold', color: '#008080' },
+  avatarImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+  },
+  avatarLargeText: { fontSize: 26, fontWeight: 'bold', color: '#1B1B1D' },
   infoRows: { width: '100%', gap: 6 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoRowText: { fontSize: 14, color: '#444' },
+  infoRowText: { fontSize: 14, color: '#3A3A3C' },
+
+  /* Image Viewer */
+  viewerOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  viewerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(27, 27, 29, 0.82)',
+  },
+  viewerHeader: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+  },
+  closeText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
 
   /* Summary */
   summaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    boxShadow: '0 4px 20px #00000015',
+    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginBottom: 16,
+    marginHorizontal: 16,
   },
   sumItem: { flex: 1, alignItems: 'center', gap: 3 },
   sumValue: { fontSize: 14, fontWeight: 'bold' },
-  sumLabel: { fontSize: 10, color: '#888' },
-  sumDivider: { width: 1, backgroundColor: '#e5e7eb' },
+  sumLabel: { fontSize: 10, color: '#3A3A3C' },
+  sumDivider: { width: 1, backgroundColor: '#D7DCDC' },
 
   /* Section */
   sectionHeader: {
@@ -798,6 +954,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+    marginHorizontal: 16,
   },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: '#11181C' },
   sectionCount: { fontSize: 12, color: '#888' },
@@ -808,19 +965,20 @@ const styles = StyleSheet.create({
 
   /* Transaction Card */
   txCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#d6dfdf',
     borderRadius: 14,
     padding: 12,
     marginBottom: 10,
-    boxShadow: '0 4px 16px #00000012',
+
     gap: 8,
+    marginHorizontal: 16,
   },
   txTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  txDate: { fontSize: 12, color: '#555', fontWeight: '600' },
+  txDate: { fontSize: 12, color: '#3A3A3C', fontWeight: '600' },
   txInvoice: {
     fontSize: 11,
-    color: '#008080',
-    backgroundColor: '#e0f2f1',
+    color: '#1B1B1D',
+    backgroundColor: '#D7DCDC',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
@@ -849,45 +1007,67 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#008080ac',
+    backgroundColor: '#2F4F4F',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 6px 20px #00808055',
+    boxShadow: '0 8px 20px rgba(47, 79, 79, 0.35)',
   },
 
   /* Modal */
   modalOverlay: { flex: 1, justifyContent: 'flex-start' },
   modalBg: { ...StyleSheet.absoluteFillObject, backgroundColor: '#00000055' },
   modalSheet: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EAEDED',
     margin: 10,
+    marginTop: 70,
     borderRadius: 20,
     padding: 20,
     paddingBottom: 36,
     maxHeight: '90%',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
   },
 
   modalLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#555',
+    color: '#3A3A3C',
     marginBottom: 6,
     marginTop: 10,
   },
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  phoneInput: {
+    flex: 1,
+  },
+  contactBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#D7DCDC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
   modalInput: {
-    backgroundColor: '#f4f6f8',
+    backgroundColor: '#EAEDED',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#11181C',
+    color: '#1B1B1D',
+    borderWidth: 1,
+    borderColor: '#D7DCDC',
   },
   modalBtns: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   modalTitle: {
     flex: 3,
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#575757',
+    color: '#1B1B1D',
   },
   cancelBtn: {
     flex: 1,
@@ -898,5 +1078,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  saveBtnText: { color: '#008080ff', fontWeight: '400', fontSize: 15 },
+  saveBtnText: { color: '#2F4F4F', fontWeight: '600', fontSize: 15 },
 });
