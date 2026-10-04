@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     alignItems: 'center',
 
-    boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
+    // boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
   },
   openCalcBtnContainer: {
     position: 'absolute',

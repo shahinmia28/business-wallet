@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    boxShadow: '0 10px 24px rgba(27, 27, 29, 0.08)',
+    // boxShadow: '0 10px 24px rgba(27, 27, 29, 0.08)',
   },
 
   reportIcon: {

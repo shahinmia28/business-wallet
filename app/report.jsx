@@ -111,18 +111,17 @@ export default function Report() {
       </View>
 
       {/* ================= SUMMARY CARD ================= */}
-      {/* ================= SUMMARY CARD ================= */}
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>মাসিক সারাংশ</Text>
-
         {/* ===== TOTAL SELL (BIG) ===== */}
         <Text style={styles.totalSellBig}>{totalSell}৳</Text>
-        <Text style={styles.subLabel}>মোট বিক্রি</Text>
+        {/* <Text style={styles.subLabel}>মোট বিক্রি</Text> */}
 
         {/* ===== TOTAL PROFIT ===== */}
         <View style={{ marginTop: 16 }}>
           <View style={styles.rowHeader}>
-            <Text style={styles.profitText}>মোট লাভ</Text>
+            <Text style={styles.profitText}>
+              লাভ = <Text style={styles.amountText}>{totalProfit}৳</Text>
+            </Text>
             <Text style={styles.percentText}>{profitPercent}%</Text>
           </View>
 
@@ -137,15 +136,14 @@ export default function Report() {
               ]}
             />
           </View>
-
-          <Text style={styles.amountText}>{totalProfit}৳</Text>
-          <Text style={styles.helperText}>মোট বিক্রির উপর লাভ</Text>
         </View>
 
         {/* ===== TOTAL EXPENSE ===== */}
         <View style={{ marginTop: 20 }}>
           <View style={styles.rowHeader}>
-            <Text style={styles.expenseText}>মোট খরচ</Text>
+            <Text style={styles.expenseText}>
+              খরচ = <Text style={styles.amountText}>{totalExpense}৳</Text>
+            </Text>
             <Text style={styles.percentText}>{expensePercent}%</Text>
           </View>
 
@@ -160,15 +158,14 @@ export default function Report() {
               ]}
             />
           </View>
-
-          <Text style={styles.amountText}>{totalExpense}৳</Text>
-          <Text style={styles.helperText}>মোট লাভের উপর খরচ</Text>
         </View>
 
         {/* ===== TOTAL BALANCE ===== */}
         <View style={{ marginTop: 20 }}>
           <View style={styles.rowHeader}>
-            <Text style={styles.balanceText}>মোট ব্যালেন্স</Text>
+            <Text style={styles.balanceText}>
+              ব্যালেন্স = <Text style={styles.amountText}>{totalBalance}৳</Text>
+            </Text>
             <Text style={styles.percentText}>{balancePercent}%</Text>
           </View>
 
@@ -183,9 +180,6 @@ export default function Report() {
               ]}
             />
           </View>
-
-          <Text style={styles.amountText}>{totalBalance}৳</Text>
-          <Text style={styles.helperText}>মোট লাভের উপর ব্যালেন্স</Text>
         </View>
       </View>
 
@@ -254,7 +248,7 @@ function HorizontalBar({ name, amount, percent, color }) {
 
 /* ================= COLORS ================= */
 
-const EXPENSE_COLORS = ['#2F4F4F', '#3A3A3C', '#1B1B1D', '#EAEDED', '#D7DCDC'];
+const EXPENSE_COLORS = ['#2F4F4F', '#3A3A3C', '#1B1B1D', '#b2b3b3', '#707070'];
 
 /* ================= STYLES ================= */
 
@@ -288,11 +282,10 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#EAEDED',
     borderRadius: 18,
     padding: 16,
     marginBottom: 16,
-    elevation: 4,
   },
   totalSellBig: {
     fontSize: 32,
@@ -302,23 +295,9 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 
-  subLabel: {
-    textAlign: 'center',
-    color: '#3A3A3C',
-    fontWeight: '600',
-    marginTop: 2,
-  },
-
   amountText: {
     fontWeight: '700',
     marginTop: 6,
-    color: '#1B1B1D',
-  },
-
-  helperText: {
-    fontSize: 12,
-    color: '#3A3A3C',
-    marginTop: 2,
   },
 
   percentText: {
@@ -332,13 +311,14 @@ const styles = StyleSheet.create({
 
   expenseText: {
     fontWeight: '700',
-    color: '#1B1B1D',
+    color: '#8e0202',
   },
 
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 12,
+    textAlign: 'center',
   },
 
   sellText: {

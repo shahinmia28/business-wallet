@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   container: {
     width: '90%',
     backgroundColor: '#EAEDED',
-    boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
+    // boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
     padding: 16,
     borderRadius: 20,
     flexDirection: 'row',

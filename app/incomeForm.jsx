@@ -139,9 +139,10 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#EAEDED',
-    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    // boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     borderRadius: 10,
     padding: 12,
+    paddingLeft: 16,
     marginBottom: 12,
     borderWidth: 0.5,
     borderColor: '#D7DCDC',
@@ -172,8 +173,5 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
-    borderWidth: 1,
-    borderColor: '#D7DCDC',
   },
 });

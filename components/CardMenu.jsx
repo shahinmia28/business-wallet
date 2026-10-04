@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   card: {
-    boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
+    // boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
     flex: 1,
     padding: 16,
     borderRadius: 20,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: '#EAEDED',
     marginHorizontal: 4,
-    boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
+    // boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
   },
 
   label2: {

@@ -109,14 +109,13 @@ export default function NotesPage() {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#ffffff',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    marginTop: 25,
     marginBottom: 14,
   },
   iconBtn: { padding: 6 },
@@ -137,9 +136,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     marginHorizontal: 16,
     marginBottom: 10,
-    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
-    borderWidth: 1,
-    borderColor: '#D7DCDC',
   },
   noteCardRow: {
     flexDirection: 'row',

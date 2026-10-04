@@ -2,9 +2,9 @@
   "expo": {
     "name": "BusinessWallet",
     "slug": "BusinessWallet",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
-    "icon": "./assets/images/icon11.png",
+    "icon": "./assets/images/BW_logo.png",
     "scheme": "businesswallet",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,24 +13,24 @@
     },
     "android": {
       "package": "com.shahin.businesswallet",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#e6f4fe00",
-        "foregroundImage": "./assets/images/icon11.png"
+        "foregroundImage": "./assets/images/BW_logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/icon11.png"
+      "favicon": "./assets/images/BW_logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/icon11.png",
+          "image": "./assets/images/BW_logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

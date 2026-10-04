@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    // boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

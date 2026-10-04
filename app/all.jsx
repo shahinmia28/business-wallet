@@ -277,8 +277,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 18,
-    boxShadow: '0 6px 30px #00000022',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#EAEDED',
     borderRadius: 22,
   },
   summaryTitle: {
@@ -300,20 +299,16 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    boxShadow: '0 6px 30px #00000022',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#EAEDED',
     padding: 10,
     borderRadius: 12,
   },
   deleteAllBtn: {
     flex: 1,
-    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     padding: 10,
     borderRadius: 12,
     alignItems: 'center',
     backgroundColor: '#EAEDED',
-    borderWidth: 1,
-    borderColor: '#D7DCDC',
   },
   modeRow: { flexDirection: 'row', marginBottom: 15 },
   modeBtn: {
@@ -346,6 +341,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#2F4F4F',
     padding: 16,
     borderRadius: 50,
-    elevation: 5,
   },
 });
