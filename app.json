@@ -2,9 +2,9 @@
   "expo": {
     "name": "BusinessWallet",
     "slug": "BusinessWallet",
-    "version": "1.0.6",
+    "version": "1.0.8",
     "orientation": "portrait",
-    "icon": "./assets/images/BW_logo2.png",
+    "icon": "./assets/images/BW_icon_square.png",
     "scheme": "businesswallet",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,24 +13,24 @@
     },
     "android": {
       "package": "com.shahin.businesswallet",
-      "versionCode": 6,
+      "versionCode": 8,
       "adaptiveIcon": {
         "backgroundColor": "#e6f4fe00",
-        "foregroundImage": "./assets/images/BW_logo2.png"
+        "foregroundImage": "./assets/images/BW_icon_square.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/BW_logo2.png"
+      "favicon": "./assets/images/BW_icon_square.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/BW_logo2.png",
+          "image": "./assets/images/BW_icon_square.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -47,7 +47,9 @@
         {
           "faceIDPermission": "Allow BusinessWallet to use Face ID to unlock private notes."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
