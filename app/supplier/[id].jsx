@@ -160,7 +160,7 @@ export default function SupplierDetail() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size='large' color='#2F4F4F' />
+        <ActivityIndicator size='large' color='#00ac56' />
       </View>
     );
   }
@@ -168,7 +168,7 @@ export default function SupplierDetail() {
   if (!supplier) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: '#3A3A3C' }}>সাপ্লায়ার পাওয়া যায়নি</Text>
+        <Text style={{ color: '#00944a' }}>সাপ্লায়ার পাওয়া যায়নি</Text>
       </View>
     );
   }
@@ -188,7 +188,7 @@ export default function SupplierDetail() {
             onPress={() => setEditSupplierModal(true)}
             style={styles.iconBtn}
           >
-            <Ionicons name='create-outline' size={22} color='#2F4F4F' />
+            <Ionicons name='create-outline' size={22} color='#00ac56' />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleStatement}
@@ -201,7 +201,7 @@ export default function SupplierDetail() {
             onPress={handleDeleteSupplier}
             style={styles.iconBtn}
           >
-            <Ionicons name='trash-outline' size={22} color='#1B1B1D' />
+            <Ionicons name='trash-outline' size={22} color='#be0006' />
           </TouchableOpacity>
         </View>
       </View>
@@ -235,14 +235,14 @@ export default function SupplierDetail() {
             {supplier.phone ? (
               <Pressable
                 onPress={() => handleCall(supplier.phone)}
-                android_ripple={{ color: '#dfe3e3' }}
+                android_ripple={{ color: '#b7cec3' }}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  backgroundColor: '#dfe3e3',
+                  backgroundColor: '#b7cec3',
                   borderWidth: 1,
-                  borderColor: '#2F4F4F',
+                  borderColor: '#00ac56',
                   borderRadius: 12,
                   paddingHorizontal: 12,
                   paddingVertical: 10,
@@ -254,7 +254,7 @@ export default function SupplierDetail() {
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: '#2F4F4F',
+                    backgroundColor: '#00ac56',
                     paddingHorizontal: 10,
                     paddingVertical: 6,
                     borderRadius: 20,
@@ -274,9 +274,7 @@ export default function SupplierDetail() {
                 </View>
               </Pressable>
             ) : null}
-            {supplier.name ? (
-              <InfoRow icon='person-outline' text={supplier.name} />
-            ) : null}
+
             {supplier.address ? (
               <InfoRow icon='location-outline' text={supplier.address} />
             ) : null}
@@ -291,27 +289,23 @@ export default function SupplierDetail() {
           <SumItem
             label='মোট ক্রয়'
             value={fmt(supplier.totalPurchase)}
-            color='#2F4F4F'
+            color='#00ac56'
           />
           <View style={styles.sumDivider} />
           <SumItem
             label='পেমেন্ট'
             value={fmt(supplier.totalPayment)}
-            color='#3A3A3C'
+            color='#00ac56'
           />
           <View style={styles.sumDivider} />
           <SumItem
             label='বাকি'
             value={fmt(supplier.due)}
-            color={supplier.due > 0 ? '#3A3A3C' : '#2F4F4F'}
+            color={supplier.due > 0 ? '#b20000' : '#00ac56'}
           />
         </View>
 
         {/* ── Transactions ── */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>লেনদেনের ইতিহাস</Text>
-          <Text style={styles.sectionCount}>{transactions.length} টি</Text>
-        </View>
 
         {transactions.length === 0 ? (
           <View style={styles.emptyBox}>
@@ -874,7 +868,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#1B1B1D',
+    color: '#00974b',
     marginHorizontal: 8,
   },
   headerActions: { flexDirection: 'row', gap: 6 },
@@ -882,10 +876,10 @@ const styles = StyleSheet.create({
 
   /* Info Card */
   infoCard: {
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#dfebe5',
     borderRadius: 20,
     padding: 16,
-    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
+    // boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginBottom: 12,
     alignItems: 'center',
     gap: 12,
@@ -896,7 +890,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#D7DCDC',
+    backgroundColor: '#00b65b',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -906,7 +900,7 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
   },
-  avatarLargeText: { fontSize: 26, fontWeight: 'bold', color: '#1B1B1D' },
+  avatarLargeText: { fontSize: 26, fontWeight: 'bold', color: '#dfebe5' },
   infoRows: { width: '100%', gap: 6 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   infoRowText: { fontSize: 14, color: '#3A3A3C' },
@@ -934,18 +928,18 @@ const styles = StyleSheet.create({
 
   /* Summary */
   summaryCard: {
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#dfebe5',
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
+    // boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginBottom: 16,
     marginHorizontal: 16,
   },
   sumItem: { flex: 1, alignItems: 'center', gap: 3 },
   sumValue: { fontSize: 14, fontWeight: 'bold' },
-  sumLabel: { fontSize: 10, color: '#3A3A3C' },
+  sumLabel: { fontSize: 10, color: '#777878' },
   sumDivider: { width: 1, backgroundColor: '#D7DCDC' },
 
   /* Section */
@@ -965,7 +959,7 @@ const styles = StyleSheet.create({
 
   /* Transaction Card */
   txCard: {
-    backgroundColor: '#d6dfdf',
+    backgroundColor: '#dfebe5',
     borderRadius: 14,
     padding: 12,
     marginBottom: 10,
@@ -1007,10 +1001,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#2F4F4F',
+    backgroundColor: '#00542a',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 8px 20px rgba(47, 79, 79, 0.35)',
+    // boxShadow: '0 8px 20px rgba(47, 79, 79, 0.35)',
   },
 
   /* Modal */
@@ -1078,5 +1072,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  saveBtnText: { color: '#2F4F4F', fontWeight: '600', fontSize: 15 },
+  saveBtnText: { color: '#00ac56', fontWeight: '600', fontSize: 15 },
 });

@@ -7,15 +7,23 @@ export default function SummaryList({ totalExpense, totalIncome, totalSell }) {
     <View style={styles.summaryContainer}>
       <View style={styles.card}>
         <Text style={styles.title}>বিক্রি</Text>
-        <Text style={[styles.value, { color: '#1B1B1D' }]}>{totalSell}৳</Text>
+        <Text style={[styles.value, { color: '#2F4F4F' }]}>{totalSell}৳</Text>
       </View>
       <View style={styles.card}>
         <Text style={styles.title}>লাভ</Text>
-        <Text style={[styles.value, { color: '#3A3A3C' }]}>{totalIncome}৳</Text>
+        <Text style={[styles.value, { color: '#2F4F4F' }]}>{totalIncome}৳</Text>
       </View>
       <View style={styles.card}>
         <Text style={styles.title}>ব্যয়</Text>
-        <Text style={[styles.value, { color: '#b6031b' }]}>
+        <Text
+          style={[
+            styles.value,
+            {
+              color: '#a10217',
+              backgroundColor: '#fce0e4',
+            },
+          ]}
+        >
           {totalExpense}৳
         </Text>
       </View>
@@ -25,7 +33,9 @@ export default function SummaryList({ totalExpense, totalIncome, totalSell }) {
         <Text
           style={[
             styles.value,
-            { color: balance >= 0 ? '#1B1B1D' : '#3A3A3C' },
+            {
+              color: balance >= 0 ? '#2F4F4F' : '#a10217',
+            },
           ]}
         >
           {balance}৳
@@ -40,11 +50,13 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#ffffff',
+    borderWidth: 1.25,
+    borderColor: '#dcccae',
     borderRadius: 18,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    // boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    paddingLeft: 16,
+    paddingRight: 10,
+    paddingVertical: 7,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -52,11 +64,14 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#3A3A3C',
+    fontWeight: '500',
+    color: '#6c7575',
   },
   value: {
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '600',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 100,
   },
 });

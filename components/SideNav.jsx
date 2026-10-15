@@ -70,10 +70,7 @@ export default function SideNav({ visible, onClose }) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.logo}>
-            <Text style={{ fontSize: 24 }}>💰</Text>
-          </View>
-          <Text style={styles.headerText}>Daily Wallet</Text>
+          <Text style={styles.headerText}>Business Wallet</Text>
         </View>
 
         <ScrollView
@@ -87,63 +84,12 @@ export default function SideNav({ visible, onClose }) {
             onPress={() => go('/', 'Home')}
             selected={selected === 'Home'}
           />
-          <MenuItem
-            icon='plus-circle'
-            label='Income Form'
-            onPress={() => go('/incomeForm', 'Income Form')}
-            selected={selected === 'Income Form'}
-          />
-          <MenuItem
-            icon='minus-circle'
-            label='Expense Form'
-            onPress={() => go('/expenseForm', 'Expense Form')}
-            selected={selected === 'Expense Form'}
-          />
-          <MenuItem
-            icon='clipboard-list'
-            label='All Calculations'
-            onPress={() => go('/all', 'All Calculations')}
-            selected={selected === 'All Calculations'}
-          />
-          <MenuItem
-            icon='calendar-today'
-            label='Today'
-            onPress={() => go('/today', 'Today')}
-            selected={selected === 'Today'}
-          />
-          <MenuItem
-            icon='account-group'
-            label='Supplier'
-            onPress={() => go('/supplier', 'Supplier')}
-            selected={selected === 'Supplier'}
-          />
-          <MenuItem
-            icon='account-heart'
-            label='Customer'
-            onPress={() => go('/customer', 'Customer')}
-            selected={selected === 'Customer'}
-          />
-          <MenuItem
-            icon='note-text'
-            label='Notes'
-            onPress={() => go('/notes', 'Notes')}
-            selected={selected === 'Notes'}
-          />
 
-          {/* Divider */}
-          <View style={styles.divider} />
-
-          <MenuItem
-            icon='information'
-            label='About Me'
-            onPress={() => go('/about', 'About Me')}
-            selected={selected === 'About Me'}
-          />
           <MenuItem
             icon='phone'
-            label='Contact Me'
-            onPress={() => go('/contact', 'Contact Me')}
-            selected={selected === 'Contact Me'}
+            label='Contact'
+            onPress={() => go('/contact', 'Contact')}
+            selected={selected === 'Contact'}
           />
           <MenuItem
             icon='shield-lock'
@@ -152,10 +98,6 @@ export default function SideNav({ visible, onClose }) {
             selected={selected === 'Privacy Policy'}
           />
 
-          {/* Divider */}
-          <View style={styles.divider} />
-
-          {/* Backup — আলাদা রঙে */}
           <MenuItem
             icon='cloud-upload'
             label='Backup & Restore'
@@ -229,23 +171,12 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 16,
     paddingBottom: 20,
-    backgroundColor: '#1B1B1D',
+    backgroundColor: '#9e8044',
     flexDirection: 'column',
     alignItems: 'center',
     gap: 12,
   },
-  logo: {
-    width: 55,
-    height: 55,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
+
   headerText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -264,11 +195,5 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 15,
     color: '#595959',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-    marginHorizontal: 16,
-    marginVertical: 6,
   },
 });

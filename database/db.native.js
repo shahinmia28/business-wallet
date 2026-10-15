@@ -8,6 +8,8 @@ const db = SQLite.openDatabaseSync('dailyExpense.db');
 
 db.execSync('PRAGMA foreign_keys = ON;');
 
+const currentTimestamp = () => new Date().toISOString();
+
 /* ===================== INIT DB + MIGRATIONS ===================== */
 export const initDB = async () => {
   // 1️⃣ Create migrations table if not exists
@@ -196,6 +198,16 @@ export const initDB = async () => {
     }
   }
 
+  for (const table of ['suppliers', 'customers']) {
+    const columns = await db.getAllAsync(`PRAGMA table_info(${table});`);
+    if (!columns.some((column) => column.name === 'updatedAt')) {
+      await db.execAsync(`ALTER TABLE ${table} ADD COLUMN updatedAt TEXT;`);
+    }
+    await db.runAsync(
+      `UPDATE ${table} SET updatedAt=createdAt WHERE updatedAt IS NULL;`,
+    );
+  }
+
   console.log('DB initialized with migrations');
 };
 
@@ -290,9 +302,17 @@ export const insertSupplier = async ({
   try {
     return await db.runAsync(
       `INSERT INTO suppliers
-      (name,phone,address,note,profileImagePath,createdAt,isActive)
-      VALUES (?,?,?,?,?, ?,1)`,
-      [name, phone, address, note, profileImagePath ?? null, createdAt],
+      (name,phone,address,note,profileImagePath,createdAt,updatedAt,isActive)
+      VALUES (?,?,?,?,?,?,?,1)`,
+      [
+        name,
+        phone,
+        address,
+        note,
+        profileImagePath ?? null,
+        createdAt,
+        createdAt,
+      ],
     );
   } catch (e) {
     if (e.message && e.message.includes('UNIQUE')) {
@@ -310,6 +330,7 @@ export const updateSupplier = async ({
   note,
   profileImagePath,
 }) => {
+  const updatedAt = currentTimestamp();
   if (phone && phone.trim()) {
     const existing = await getSupplierByPhone(phone);
     if (existing && existing.id !== id) {
@@ -325,9 +346,10 @@ export const updateSupplier = async ({
          phone=?,
          address=?,
          note=?,
-         profileImagePath=?
+         profileImagePath=?,
+         updatedAt=?
          WHERE id=?`,
-        [name, phone, address, note, profileImagePath ?? null, id],
+        [name, phone, address, note, profileImagePath ?? null, updatedAt, id],
       );
     }
 
@@ -337,9 +359,10 @@ export const updateSupplier = async ({
        name=?,
        phone=?,
        address=?,
-       note=?
+       note=?,
+       updatedAt=?
        WHERE id=?`,
-      [name, phone, address, note, id],
+      [name, phone, address, note, updatedAt, id],
     );
   } catch (e) {
     if (e.message && e.message.includes('UNIQUE')) {
@@ -359,10 +382,16 @@ export const deleteSupplier = async (id) => {
 
 // Delete না করে শুধু Hide করার জন্য (isActive=0)
 export const deactivateSupplier = async (id) =>
-  await db.runAsync(`UPDATE suppliers SET isActive=0 WHERE id=?`, [id]);
+  await db.runAsync(
+    `UPDATE suppliers SET isActive=0, updatedAt=? WHERE id=?`,
+    [currentTimestamp(), id],
+  );
 
 export const activateSupplier = async (id) =>
-  await db.runAsync(`UPDATE suppliers SET isActive=1 WHERE id=?`, [id]);
+  await db.runAsync(
+    `UPDATE suppliers SET isActive=1, updatedAt=? WHERE id=?`,
+    [currentTimestamp(), id],
+  );
 
 export const getAllSuppliersIncludingInactive = async () =>
   await db.getAllAsync(`
@@ -450,8 +479,8 @@ export const insertSupplierTransaction = async ({
   invoiceNo,
   date,
   createdAt,
-}) =>
-  await db.runAsync(
+}) => {
+  const result = await db.runAsync(
     `
 INSERT INTO supplier_transactions
 (
@@ -475,6 +504,12 @@ VALUES(?,?,?,?,?,?,?)
       createdAt,
     ],
   );
+  await db.runAsync('UPDATE suppliers SET updatedAt=? WHERE id=?', [
+    createdAt,
+    supplierId,
+  ]);
+  return result;
+};
 
 export const updateSupplierTransaction = async ({
   id,
@@ -483,8 +518,8 @@ export const updateSupplierTransaction = async ({
   description,
   invoiceNo,
   date,
-}) =>
-  await db.runAsync(
+}) => {
+  const result = await db.runAsync(
     `
 UPDATE supplier_transactions
 
@@ -499,14 +534,34 @@ date=?
 WHERE id=?`,
     [purchase, payment, description, invoiceNo ?? '', date, id],
   );
-
-export const deleteSupplierTransaction = async (id) =>
   await db.runAsync(
+    `UPDATE suppliers SET updatedAt=? WHERE id=(
+      SELECT supplierId FROM supplier_transactions WHERE id=?
+    )`,
+    [currentTimestamp(), id],
+  );
+  return result;
+};
+
+export const deleteSupplierTransaction = async (id) => {
+  const transaction = await db.getFirstAsync(
+    'SELECT supplierId FROM supplier_transactions WHERE id=?',
+    [id],
+  );
+  const result = await db.runAsync(
     `
 DELETE FROM supplier_transactions
 WHERE id=?`,
     [id],
   );
+  if (transaction) {
+    await db.runAsync('UPDATE suppliers SET updatedAt=? WHERE id=?', [
+      currentTimestamp(),
+      transaction.supplierId,
+    ]);
+  }
+  return result;
+};
 
 /* ===================== NOTES ===================== */
 export const getAllNotes = async () =>
@@ -620,7 +675,7 @@ export const insertCustomer = async ({
   }
   try {
     return await db.runAsync(
-      `INSERT INTO customers (name,phone,address,note,profileImagePath,prescriptionPhotoPath,createdAt,isActive) VALUES (?,?,?,?,?,?,?,1)`,
+      `INSERT INTO customers (name,phone,address,note,profileImagePath,prescriptionPhotoPath,createdAt,updatedAt,isActive) VALUES (?,?,?,?,?,?,?,?,1)`,
       [
         name,
         phone,
@@ -628,6 +683,7 @@ export const insertCustomer = async ({
         note,
         profileImagePath ?? null,
         prescriptionPhotoPath ?? null,
+        createdAt,
         createdAt,
       ],
     );
@@ -647,6 +703,7 @@ export const updateCustomer = async ({
   profileImagePath,
   prescriptionPhotoPath,
 }) => {
+  const updatedAt = currentTimestamp();
   if (phone && phone.trim()) {
     const existing = await getCustomerByPhone(phone);
     if (existing && existing.id !== id)
@@ -656,7 +713,7 @@ export const updateCustomer = async ({
     if (profileImagePath !== undefined || prescriptionPhotoPath !== undefined) {
       const current = await getCustomerById(id);
       return await db.runAsync(
-        `UPDATE customers SET name=?, phone=?, address=?, note=?, profileImagePath=?, prescriptionPhotoPath=? WHERE id=?`,
+        `UPDATE customers SET name=?, phone=?, address=?, note=?, profileImagePath=?, prescriptionPhotoPath=?, updatedAt=? WHERE id=?`,
         [
           name,
           phone,
@@ -664,14 +721,15 @@ export const updateCustomer = async ({
           note,
           profileImagePath ?? current?.profileImagePath ?? null,
           prescriptionPhotoPath ?? current?.prescriptionPhotoPath ?? null,
+          updatedAt,
           id,
         ],
       );
     }
 
     return await db.runAsync(
-      `UPDATE customers SET name=?, phone=?, address=?, note=? WHERE id=?`,
-      [name, phone, address, note, id],
+      `UPDATE customers SET name=?, phone=?, address=?, note=?, updatedAt=? WHERE id=?`,
+      [name, phone, address, note, updatedAt, id],
     );
   } catch (e) {
     if (e.message?.includes('UNIQUE'))
@@ -692,10 +750,16 @@ export const deleteCustomer = async (id) => {
 };
 
 export const deactivateCustomer = async (id) =>
-  await db.runAsync(`UPDATE customers SET isActive=0 WHERE id=?`, [id]);
+  await db.runAsync(
+    `UPDATE customers SET isActive=0, updatedAt=? WHERE id=?`,
+    [currentTimestamp(), id],
+  );
 
 export const activateCustomer = async (id) =>
-  await db.runAsync(`UPDATE customers SET isActive=1 WHERE id=?`, [id]);
+  await db.runAsync(
+    `UPDATE customers SET isActive=1, updatedAt=? WHERE id=?`,
+    [currentTimestamp(), id],
+  );
 
 /* ===================== CUSTOMER TRANSACTIONS ===================== */
 
@@ -713,13 +777,19 @@ export const insertCustomerTransaction = async ({
   invoiceNo,
   date,
   createdAt,
-}) =>
-  await db.runAsync(
+}) => {
+  const result = await db.runAsync(
     `INSERT INTO customer_transactions
     (customerId,sale,payment,description,invoiceNo,date,createdAt)
     VALUES(?,?,?,?,?,?,?)`,
     [customerId, sale, payment, description, invoiceNo ?? '', date, createdAt],
   );
+  await db.runAsync('UPDATE customers SET updatedAt=? WHERE id=?', [
+    createdAt,
+    customerId,
+  ]);
+  return result;
+};
 
 export const updateCustomerTransaction = async ({
   id,
@@ -728,16 +798,39 @@ export const updateCustomerTransaction = async ({
   description,
   invoiceNo,
   date,
-}) =>
-  await db.runAsync(
+}) => {
+  const result = await db.runAsync(
     `UPDATE customer_transactions
     SET sale=?, payment=?, description=?, invoiceNo=?, date=?
     WHERE id=?`,
     [sale, payment, description, invoiceNo ?? '', date, id],
   );
+  await db.runAsync(
+    `UPDATE customers SET updatedAt=? WHERE id=(
+      SELECT customerId FROM customer_transactions WHERE id=?
+    )`,
+    [currentTimestamp(), id],
+  );
+  return result;
+};
 
-export const deleteCustomerTransaction = async (id) =>
-  await db.runAsync(`DELETE FROM customer_transactions WHERE id=?`, [id]);
+export const deleteCustomerTransaction = async (id) => {
+  const transaction = await db.getFirstAsync(
+    'SELECT customerId FROM customer_transactions WHERE id=?',
+    [id],
+  );
+  const result = await db.runAsync(
+    `DELETE FROM customer_transactions WHERE id=?`,
+    [id],
+  );
+  if (transaction) {
+    await db.runAsync('UPDATE customers SET updatedAt=? WHERE id=?', [
+      currentTimestamp(),
+      transaction.customerId,
+    ]);
+  }
+  return result;
+};
 
 /* ===================== BACKUP HELPERS ===================== */
 

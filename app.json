@@ -4,7 +4,7 @@
     "slug": "BusinessWallet",
     "version": "1.0.5",
     "orientation": "portrait",
-    "icon": "./assets/images/BW_logo.png",
+    "icon": "./assets/images/BW_logo2.png",
     "scheme": "businesswallet",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -16,21 +16,21 @@
       "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#e6f4fe00",
-        "foregroundImage": "./assets/images/BW_logo.png"
+        "foregroundImage": "./assets/images/BW_logo2.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/BW_logo.png"
+      "favicon": "./assets/images/BW_logo2.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/BW_logo.png",
+          "image": "./assets/images/BW_logo2.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

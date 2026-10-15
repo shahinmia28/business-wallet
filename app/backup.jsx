@@ -80,15 +80,6 @@ export default function BackupPage() {
 
   return (
     <View style={styles.wrapper}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
-          <Ionicons name='arrow-back' size={22} color='#1B1B1D' />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Backup & Restore</Text>
-        <View style={{ width: 38 }} />
-      </View>
-
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Backup Card */}
         <View style={styles.card}>
@@ -113,7 +104,7 @@ export default function BackupPage() {
           >
             <Ionicons name='share-outline' size={20} color='#fff' />
             <Text style={styles.btnText}>
-              {backing ? 'তৈরি হচ্ছে...' : 'Backup ও Share করুন'}
+              {backing ? 'Creating...' : 'Backup & Share'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -146,14 +137,14 @@ export default function BackupPage() {
           >
             <Ionicons name='folder-open-outline' size={20} color='#fff' />
             <Text style={styles.btnText}>
-              {restoring ? 'Restore হচ্ছে...' : 'ফাইল বেছে Restore করুন'}
+              {restoring ? 'Restoring ...' : 'Restore Data'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Tips */}
         <View style={styles.tipsCard}>
-          <Text style={styles.tipsTitle}>💡 পরামর্শ</Text>
+          <Text style={styles.tipsTitle}> পরামর্শ</Text>
           {[
             'প্রতি সপ্তাহে অন্তত একবার Backup নিন',
             'Google Drive এ একটি folder বানান "BW Backup"',
@@ -172,13 +163,13 @@ export default function BackupPage() {
 }
 
 const styles = StyleSheet.create({
-  wrapper: { flex: 1, backgroundColor: '#EAEDED' },
+  wrapper: { flex: 1, backgroundColor: '#ffffff' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    marginTop: 50,
+    // marginTop: 50,
     marginBottom: 16,
   },
   iconBtn: { padding: 6 },
@@ -192,8 +183,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     alignItems: 'center',
     boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
-    borderWidth: 1,
-    borderColor: '#D7DCDC',
   },
   cardIcon: {
     width: 64,
@@ -236,9 +225,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 18,
     marginHorizontal: 16,
+    marginBottom: 40,
     boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
-    borderWidth: 1,
-    borderColor: '#D7DCDC',
   },
   tipsTitle: {
     fontSize: 14,

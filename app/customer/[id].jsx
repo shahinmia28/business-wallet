@@ -161,7 +161,7 @@ export default function CustomerDetail() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size='large' color='#2F4F4F' />
+        <ActivityIndicator size='large' color='#008e9b' />
       </View>
     );
   }
@@ -189,7 +189,7 @@ export default function CustomerDetail() {
             onPress={() => setEditCustomerModal(true)}
             style={styles.iconBtn}
           >
-            <Ionicons name='create-outline' size={22} color='#2F4F4F' />
+            <Ionicons name='create-outline' size={22} color='#008e9b' />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -203,7 +203,7 @@ export default function CustomerDetail() {
             onPress={handleDeleteCustomer}
             style={styles.iconBtn}
           >
-            <Ionicons name='trash-outline' size={22} color='#1B1B1D' />
+            <Ionicons name='trash-outline' size={22} color='#ca0000' />
           </TouchableOpacity>
         </View>
       </View>
@@ -242,9 +242,9 @@ export default function CustomerDetail() {
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  backgroundColor: '#dfe3e3',
+                  backgroundColor: '#c9dada',
                   borderWidth: 1,
-                  borderColor: '#2F4F4F',
+                  borderColor: '#008e9b',
                   borderRadius: 12,
                   paddingHorizontal: 12,
                   paddingVertical: 10,
@@ -256,7 +256,7 @@ export default function CustomerDetail() {
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: '#2F4F4F',
+                    backgroundColor: '#008e9b',
                     paddingHorizontal: 10,
                     paddingVertical: 6,
                     borderRadius: 20,
@@ -276,9 +276,7 @@ export default function CustomerDetail() {
                 </View>
               </Pressable>
             ) : null}
-            {customer.name ? (
-              <InfoRow icon='person-outline' text={customer.name} />
-            ) : null}
+
             {customer.address ? (
               <InfoRow icon='location-outline' text={customer.address} />
             ) : null}
@@ -330,12 +328,6 @@ export default function CustomerDetail() {
             value={fmt(customer.due)}
             color={customer.due > 0 ? '#3A3A3C' : '#2F4F4F'}
           />
-        </View>
-
-        {/* Transactions */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>লেনদেনের ইতিহাস</Text>
-          <Text style={styles.sectionCount}>{transactions.length} টি</Text>
         </View>
 
         {transactions.length === 0 ? (
@@ -903,6 +895,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 50,
     marginBottom: 16,
+    paddingHorizontal: 16,
   },
   backBtn: { padding: 4 },
   headerTitle: {
@@ -916,10 +909,10 @@ const styles = StyleSheet.create({
   iconBtn: { padding: 6, borderRadius: 10, backgroundColor: '#EAEDED' },
 
   infoCard: {
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#dce6e7',
     borderRadius: 20,
     padding: 16,
-    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
+    // boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginHorizontal: 16,
     marginBottom: 12,
     marginTop: 8,
@@ -930,7 +923,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#D7DCDC',
+    backgroundColor: '#008e9b',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -940,26 +933,26 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
   },
-  avatarLargeText: { fontSize: 26, fontWeight: 'bold', color: '#1B1B1D' },
+  avatarLargeText: { fontSize: 26, fontWeight: 'bold', color: '#dce6e7' },
   infoRows: { width: '100%', gap: 6 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   infoRowText: { fontSize: 14, color: '#3A3A3C' },
 
   summaryCard: {
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#dce6e7',
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    // boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
     marginBottom: 16,
-    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
+    //boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginHorizontal: 16,
   },
   sumItem: { flex: 1, alignItems: 'center', gap: 3 },
   sumValue: { fontSize: 14, fontWeight: 'bold' },
-  sumLabel: { fontSize: 10, color: '#3A3A3C' },
-  sumDivider: { width: 1, backgroundColor: '#D7DCDC' },
+  sumLabel: { fontSize: 10, color: '#009dab' },
+  sumDivider: { width: 1, backgroundColor: '#5d6b6b' },
 
   sectionHeader: {
     flexDirection: 'row',
@@ -983,20 +976,20 @@ const styles = StyleSheet.create({
     width: 140,
     height: 100,
     borderRadius: 12,
-    backgroundColor: '#D7DCDC',
+    backgroundColor: '#edf6f7',
     borderWidth: 1,
-    borderColor: '#2F4F4F',
+    borderColor: '#00a1af',
     alignItems: 'center',
     justifyContent: 'center',
   },
   emptyPrescriptionText: {
-    color: '#1B1B1D',
+    color: '#008e9b',
     fontWeight: '700',
     fontSize: 12,
   },
 
   txCard: {
-    backgroundColor: '#d8e0e0',
+    backgroundColor: '#dce6e7',
     borderRadius: 14,
     padding: 12,
     marginBottom: 10,
@@ -1008,7 +1001,7 @@ const styles = StyleSheet.create({
   txInvoice: {
     fontSize: 11,
     color: '#1B1B1D',
-    backgroundColor: '#D7DCDC',
+    backgroundColor: '#00b5c6',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
@@ -1020,7 +1013,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#D7DCDC',
+    backgroundColor: '#00b5c6',
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -1036,10 +1029,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#2F4F4F',
+    backgroundColor: '#006d77',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 8px 20px rgba(47, 79, 79, 0.35)',
+    // boxShadow: '0 8px 20px rgba(47, 79, 79, 0.35)',
   },
 
   viewerOverlay: {
@@ -1133,5 +1126,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  saveBtnText: { color: '#2F4F4F', fontWeight: '600', fontSize: 15 },
+  saveBtnText: { color: '#00a2b0', fontWeight: '600', fontSize: 15 },
 });

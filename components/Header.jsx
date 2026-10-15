@@ -32,14 +32,14 @@ export default function Header({ onMenu }) {
       <View style={styles.container}>
         {/* Hamburger */}
         <TouchableOpacity onPress={onMenu}>
-          <MaterialCommunityIcons name='menu' size={28} color='#1B1B1D' />
+          <MaterialCommunityIcons name='menu' size={28} color='#9e8044' />
         </TouchableOpacity>
 
         <View style={styles.balance}>
           <MaterialCommunityIcons
             name='currency-bdt'
             size={18}
-            color='#EAEDED'
+            color='#ffffff'
           />
           <Text style={styles.balanceText}>{balance}</Text>
         </View>
@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '90%',
-    backgroundColor: '#EAEDED',
-    // boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
+    backgroundColor: '#ffffff',
+    boxShadow: '-2px 0px 20px 1px rgba(27, 27, 29, 0.125)',
     padding: 16,
     borderRadius: 20,
     flexDirection: 'row',
@@ -69,13 +69,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#2F4F4F',
+    backgroundColor: '#9e8044',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   balanceText: {
-    color: '#EAEDED',
+    color: '#ffffff',
     fontWeight: 'bold',
   },
 });

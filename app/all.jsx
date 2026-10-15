@@ -277,8 +277,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 18,
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#ffffff',
     borderRadius: 22,
+    boxShadow: '-2px 5px 20px 1px rgba(27, 27, 29, 0.125)',
   },
   summaryTitle: {
     fontSize: 15,

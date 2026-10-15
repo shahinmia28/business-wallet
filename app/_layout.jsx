@@ -22,6 +22,7 @@ const HEADER_PAGES = [
   '/about',
   '/contact',
   '/privacy',
+  '/backup',
 ];
 
 export default function Layout() {

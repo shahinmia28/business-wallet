@@ -13,8 +13,8 @@ export default function CardMenu() {
           style={styles.card}
           onPress={() => router.push('/today')}
         >
-          <Ionicons name='calendar' size={30} color='#1B1B1D' />
-          <Text style={[styles.label, { color: '#3A3A3C' }]}>আজ</Text>
+          <Ionicons name='calendar' size={30} color='#9e8044' />
+          <Text style={[styles.label, { color: '#2F4F4F' }]}>আজ</Text>
         </TouchableOpacity>
 
         {/* All */}
@@ -22,8 +22,8 @@ export default function CardMenu() {
           style={styles.card}
           onPress={() => router.push('/all')}
         >
-          <Feather name='list' size={30} color='#1B1B1D' />
-          <Text style={[styles.label, { color: '#3A3A3C' }]}>সমস্ত হিসাব</Text>
+          <Feather name='list' size={30} color='#9e8044' />
+          <Text style={[styles.label, { color: '#2F4F4F' }]}>সমস্ত হিসাব</Text>
         </TouchableOpacity>
 
         {/* Notes */}
@@ -31,8 +31,8 @@ export default function CardMenu() {
           style={styles.card}
           onPress={() => router.push('/notes')}
         >
-          <MaterialCommunityIcons name='note-text' size={30} color='#1B1B1D' />
-          <Text style={[styles.label, { color: '#3A3A3C' }]}>নোট</Text>
+          <MaterialCommunityIcons name='note-text' size={30} color='#9e8044' />
+          <Text style={[styles.label, { color: '#2F4F4F' }]}>নোট</Text>
         </TouchableOpacity>
         {/* Notes */}
       </View>
@@ -42,9 +42,9 @@ export default function CardMenu() {
           style={styles.card2}
           onPress={() => router.push('/customer')}
         >
-          <Ionicons name='person-add-outline' size={24} color='#1B1B1D' />
+          <Ionicons name='person-add-outline' size={24} color='#00b4b7' />
 
-          <Text style={[styles.label2, { color: '#3A3A3C' }]}>কাস্টমার</Text>
+          <Text style={[styles.label2, { color: '#2F4F4F' }]}>কাস্টমার</Text>
         </TouchableOpacity>
 
         {/* Supplier */}
@@ -52,9 +52,9 @@ export default function CardMenu() {
           style={styles.card2}
           onPress={() => router.push('/supplier')}
         >
-          <Feather name='truck' size={24} color='#1B1B1D' />
+          <Feather name='truck' size={24} color='#00b753' />
 
-          <Text style={[styles.label2, { color: '#3A3A3C' }]}>সাপ্লায়ার</Text>
+          <Text style={[styles.label2, { color: '#2F4F4F' }]}>সাপ্লায়ার</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -69,11 +69,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   card: {
-    // boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
+    boxShadow: '-2px 10px 20px 1px rgba(27, 27, 29, 0.125)',
     flex: 1,
     padding: 16,
     borderRadius: 20,
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     marginHorizontal: 4,
   },
@@ -97,9 +97,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     borderRadius: 18,
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#ffffff',
     marginHorizontal: 4,
-    // boxShadow: '0 8px 24px rgba(27, 27, 29, 0.08)',
+    boxShadow: '-2px 10px 20px 1px rgba(27, 27, 29, 0.125)',
   },
 
   label2: {

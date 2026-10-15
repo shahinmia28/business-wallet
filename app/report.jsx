@@ -120,7 +120,7 @@ export default function Report() {
         <View style={{ marginTop: 16 }}>
           <View style={styles.rowHeader}>
             <Text style={styles.profitText}>
-              লাভ = <Text style={styles.amountText}>{totalProfit}৳</Text>
+              লাভ --- <Text style={styles.amountText}>{totalProfit}৳</Text>
             </Text>
             <Text style={styles.percentText}>{profitPercent}%</Text>
           </View>
@@ -142,7 +142,7 @@ export default function Report() {
         <View style={{ marginTop: 20 }}>
           <View style={styles.rowHeader}>
             <Text style={styles.expenseText}>
-              খরচ = <Text style={styles.amountText}>{totalExpense}৳</Text>
+              খরচ --- <Text style={styles.amountText}>{totalExpense}৳</Text>
             </Text>
             <Text style={styles.percentText}>{expensePercent}%</Text>
           </View>
@@ -164,7 +164,8 @@ export default function Report() {
         <View style={{ marginTop: 20 }}>
           <View style={styles.rowHeader}>
             <Text style={styles.balanceText}>
-              ব্যালেন্স = <Text style={styles.amountText}>{totalBalance}৳</Text>
+              ব্যালেন্স ---{' '}
+              <Text style={styles.amountText}>{totalBalance}৳</Text>
             </Text>
             <Text style={styles.percentText}>{balancePercent}%</Text>
           </View>
@@ -264,15 +265,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginVertical: 10,
   },
 
   monthSelector: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#D7DCDC',
+    backgroundColor: '#ffffff',
     borderRadius: 20,
+    boxShadow: '-2px 5px 20px 1px rgba(27, 27, 29, 0.125)',
   },
 
   monthText: {
@@ -282,10 +284,11 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#ffffff',
     borderRadius: 18,
     padding: 16,
-    marginBottom: 16,
+    marginVertical: 12,
+    boxShadow: '-2px 5px 20px 1px rgba(27, 27, 29, 0.125)',
   },
   totalSellBig: {
     fontSize: 32,

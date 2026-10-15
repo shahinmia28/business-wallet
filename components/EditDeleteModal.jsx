@@ -18,6 +18,8 @@ import { useData } from '../context/DataContext';
 import BDDateTime from '../utils/BDDateTime';
 
 const expenseCategories = ['বাজার', 'বিল', 'ঔষধ', 'ভাড়া'];
+const expenseCategories1 = ['বাজার', 'ঔষধ', 'বিদ্যুৎ', 'মোবাইল'];
+const expenseCategories2 = ['ভাড়া', 'শিক্ষা', 'পোশাক', 'গ্যাস'];
 
 export default function EditDeleteModal({ visible, item, onClose }) {
   if (!item) return null;
@@ -175,7 +177,21 @@ export default function EditDeleteModal({ visible, item, onClose }) {
               />
               {/* Icon Buttons */}
               <View style={styles.iconRow}>
-                {expenseCategories.map((item) => (
+                {expenseCategories1.map((item) => (
+                  <TouchableOpacity
+                    key={item}
+                    style={[
+                      styles.iconButton,
+                      reason === item && styles.selectedIconButton,
+                    ]}
+                    onPress={() => setReason(item)}
+                  >
+                    <Text style={{ color: '#3A3A3C' }}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={styles.iconRow}>
+                {expenseCategories2.map((item) => (
                   <TouchableOpacity
                     key={item}
                     style={[

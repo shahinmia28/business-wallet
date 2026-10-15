@@ -53,11 +53,18 @@ export default function SupplierPage() {
     }, []),
   );
 
-  const filtered = suppliers.filter(
-    (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      (s.phone && s.phone.includes(search)),
-  );
+  const filtered = [...suppliers]
+    .sort((a, b) => {
+      const updatedAtDifference =
+        new Date(b.updatedAt || b.createdAt).getTime() -
+        new Date(a.updatedAt || a.createdAt).getTime();
+      return Number.isNaN(updatedAtDifference) ? 0 : updatedAtDifference;
+    })
+    .filter(
+      (s) =>
+        s.name.toLowerCase().includes(search.toLowerCase()) ||
+        (s.phone && s.phone.includes(search)),
+    );
 
   const fmt = (n) =>
     '৳ ' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -71,14 +78,14 @@ export default function SupplierPage() {
             onPress={() => router.back()}
             style={styles.backBtn}
           >
-            <Ionicons name='arrow-back' size={24} color='#1B1B1D' />
+            <Ionicons name='arrow-back' size={24} color='#007936' />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>সাপ্লায়ার</Text>
           <TouchableOpacity
             onPress={() => router.push('/addsupplier')}
             style={styles.addBtn}
           >
-            <Ionicons name='add' size={24} color='#EAEDED' />
+            <Ionicons name='add' size={24} color='#e9e9e9' />
           </TouchableOpacity>
         </View>
 
@@ -88,7 +95,7 @@ export default function SupplierPage() {
             label='মোট সাপ্লায়ার'
             value={summary.totalSupplier}
             icon='people-outline'
-            color='#2F4F4F'
+            color='#009141'
             isCount
           />
           <View style={styles.divider} />
@@ -96,27 +103,27 @@ export default function SupplierPage() {
             label='মোট ক্রয়'
             value={fmt(summary.totalPurchase)}
             icon='cart-outline'
-            color='#3A3A3C'
+            color='#009141'
           />
           <View style={styles.divider} />
           <SummaryItem
             label='মোট পেমেন্ট'
             value={fmt(summary.totalPayment)}
             icon='cash-outline'
-            color='#2F4F4F'
+            color='#009141'
           />
           <View style={styles.divider} />
           <SummaryItem
             label='বাকি'
             value={fmt(summary.totalDue)}
             icon='alert-circle-outline'
-            color='#3A3A3C'
+            color='#009141'
           />
         </View>
 
         {/* ===== Search ===== */}
         <View style={styles.searchBox}>
-          <Ionicons name='search-outline' size={18} color='#888' />
+          <Ionicons name='search-outline' size={18} color='#009141' />
           <TextInput
             style={styles.searchInput}
             placeholder='নাম বা ফোন দিয়ে খুঁজুন...'
@@ -125,7 +132,7 @@ export default function SupplierPage() {
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => setSearch('')}>
-              <Ionicons name='close-circle' size={18} color='#888' />
+              <Ionicons name='close-circle' size={18} color='#009141' />
             </TouchableOpacity>
           )}
         </View>
@@ -134,7 +141,7 @@ export default function SupplierPage() {
         {loading ? (
           <ActivityIndicator
             size='large'
-            color='#2F4F4F'
+            color='#00692f'
             style={{ marginTop: 40 }}
           />
         ) : filtered.length === 0 ? (
@@ -193,7 +200,11 @@ export default function SupplierPage() {
                     <Text style={styles.cardName}>{s.name}</Text>
                     {s.phone ? (
                       <Text style={styles.cardPhone}>
-                        <Ionicons name='call-outline' size={12} color='#888' />{' '}
+                        <Ionicons
+                          name='call-outline'
+                          size={12}
+                          color='#00a74b'
+                        />{' '}
                         {s.phone}
                       </Text>
                     ) : null}
@@ -203,17 +214,14 @@ export default function SupplierPage() {
                     <Text
                       style={[
                         styles.dueAmount,
-                        { color: s.due > 0 ? '#3A3A3C' : '#2F4F4F' },
+                        { color: s.due > 0 ? '#3A3A3C' : '#00a74b' },
                       ]}
                     >
                       {fmt(s.due)}
                     </Text>
-                    <Text style={styles.dueLabel}>
-                      {s.due > 0 ? 'বাকি' : 'পরিশোধ'}
-                    </Text>
                   </View>
 
-                  <Ionicons name='chevron-forward' size={18} color='#ccc' />
+                  <Ionicons name='chevron-forward' size={18} color='#00a74b' />
                 </TouchableOpacity>
               </View>
             ))}
@@ -280,22 +288,22 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   backBtn: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B1B1D' },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#00692f' },
   addBtn: {
-    backgroundColor: '#2F4F4F',
+    backgroundColor: '#00692f',
     borderRadius: 12,
     padding: 6,
   },
 
   /* Summary */
   summaryCard: {
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#dfebe5',
     borderRadius: 20,
     padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
+    // boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginBottom: 14,
     marginHorizontal: 16,
   },
@@ -323,12 +331,12 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EAEDED',
+    backgroundColor: '#dfebe5',
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 8,
-    boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
+    // boxShadow: '2px 0 10px 10px rgba(25, 25, 28, 0.089)',
     marginBottom: 14,
     marginHorizontal: 16,
   },
@@ -349,21 +357,21 @@ const styles = StyleSheet.create({
     color: '#3A3A3C',
   },
   emptyAddBtn: {
-    backgroundColor: '#2F4F4F',
+    backgroundColor: '#00692f',
     borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 10,
     marginTop: 8,
   },
   emptyAddText: {
-    color: '#EAEDED',
+    color: '#00692f',
     fontWeight: 'bold',
     fontSize: 14,
   },
 
   /* Supplier Card */
   card: {
-    backgroundColor: '#d6dfdf',
+    backgroundColor: '#dfebe5',
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
@@ -382,7 +390,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#D7DCDC',
+    backgroundColor: '#00a74b',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -395,7 +403,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1B1B1D',
+    color: '#e8e8e8',
   },
 
   /* Image Viewer */
@@ -425,11 +433,11 @@ const styles = StyleSheet.create({
   cardName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1B1B1D',
+    color: '#003518',
   },
   cardPhone: {
     fontSize: 12,
-    color: '#3A3A3C',
+    color: '#007434',
   },
   cardRight: {
     alignItems: 'flex-end',
