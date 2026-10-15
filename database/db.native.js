@@ -104,6 +104,14 @@ export const initDB = async () => {
       query: `ALTER TABLE incomes ADD COLUMN selAmount REAL;`,
     },
     {
+      name: 'add_notes_noteType_column',
+      query: `ALTER TABLE notes ADD COLUMN noteType TEXT NOT NULL DEFAULT 'text';`,
+    },
+    {
+      name: 'add_notes_isLocked_column',
+      query: `ALTER TABLE notes ADD COLUMN isLocked INTEGER NOT NULL DEFAULT 0;`,
+    },
+    {
       // ফাঁকা/NULL ফোন একাধিকবার থাকতে পারবে, কিন্তু একই ফোন নম্বর দুইবার থাকতে পারবে না
       name: 'add_unique_index_suppliers_phone',
       query: `
@@ -573,19 +581,29 @@ export const getAllNotes = async () =>
 export const insertNote = async ({
   title,
   content,
+  noteType,
+  isLocked,
   pinned,
   createdAt,
   updatedAt,
 }) =>
   await db.runAsync(
-    'INSERT INTO notes (title, content, pinned, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?);',
-    [title, content, pinned, createdAt, updatedAt],
+    'INSERT INTO notes (title, content, noteType, isLocked, pinned, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?);',
+    [title, content, noteType || 'text', isLocked ? 1 : 0, pinned, createdAt, updatedAt],
   );
 
-export const updateNote = async ({ id, title, content, pinned, updatedAt }) =>
+export const updateNote = async ({
+  id,
+  title,
+  content,
+  noteType,
+  isLocked,
+  pinned,
+  updatedAt,
+}) =>
   await db.runAsync(
-    'UPDATE notes SET title=?, content=?, pinned=?, updatedAt=? WHERE id=?;',
-    [title, content, pinned, updatedAt, id],
+    'UPDATE notes SET title=?, content=?, noteType=?, isLocked=?, pinned=?, updatedAt=? WHERE id=?;',
+    [title, content, noteType || 'text', isLocked ? 1 : 0, pinned, updatedAt, id],
   );
 
 export const deleteNoteById = async (id) =>

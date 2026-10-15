@@ -294,6 +294,8 @@ export async function restoreBackup() {
       await insertNote({
         title: n.title,
         content: n.content,
+        noteType: n.noteType === 'list' ? 'list' : 'text',
+        isLocked: n.isLocked ? 1 : 0,
         pinned: n.pinned,
         createdAt: n.createdAt,
         updatedAt: n.updatedAt,

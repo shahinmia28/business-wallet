@@ -2,7 +2,7 @@
   "expo": {
     "name": "BusinessWallet",
     "slug": "BusinessWallet",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/images/BW_logo2.png",
     "scheme": "businesswallet",
@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.shahin.businesswallet",
-      "versionCode": 5,
+      "versionCode": 6,
       "adaptiveIcon": {
         "backgroundColor": "#e6f4fe00",
         "foregroundImage": "./assets/images/BW_logo2.png"
@@ -40,7 +40,14 @@
         }
       ],
       "expo-sqlite",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow BusinessWallet to use Face ID to unlock private notes."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

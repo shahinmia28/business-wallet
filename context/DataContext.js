@@ -77,7 +77,7 @@ export const DataProvider = ({ children }) => {
       ...note,
       updatedAt: new Date().toISOString(),
     });
-    fetchData();
+    await fetchData();
   };
 
   const deleteNote = async (id) => {

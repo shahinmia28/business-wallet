@@ -1,9 +1,10 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   BackHandler,
   Modal,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,13 +12,28 @@ import {
   View,
 } from 'react-native';
 
-const TOOLBAR_HEIGHT = 52;
+const parseListContent = (content) => {
+  try {
+    const parsed = JSON.parse(content);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .filter((item) => item && typeof item.text === 'string')
+        .map((item, index) => ({
+          id: item.id || `legacy-${index}`,
+          text: item.text,
+        }));
+    }
+  } catch {
+    // Convert older numbered text notes to editable list rows.
+  }
 
-const detectListMode = (text) => {
-  if (!text) return null;
-  const lines = text.split('\n').filter((l) => l.trim() !== '');
-  const last = lines[lines.length - 1] || '';
-  return /^\d+\.\s/.test(last) ? 'number' : null;
+  return (content || '')
+    .split('\n')
+    .filter((line) => line.trim())
+    .map((line, index) => ({
+      id: `legacy-${index}`,
+      text: line.replace(/^\s*\d+\.\s*/, '').replace(/^\s*\d+\s+/, ''),
+    }));
 };
 
 export default function NoteEditor({
@@ -25,54 +41,70 @@ export default function NoteEditor({
   note,
   onSave,
   onDelete,
+  onToggleLock,
   onClose,
 }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [pinned, setPinned] = useState(0);
-  const [listMode, setListMode] = useState(null);
-
+  const [noteType, setNoteType] = useState(null);
   const undoStack = useRef([]);
   const redoStack = useRef([]);
   const isUndoRedo = useRef(false);
   const saveTimer = useRef(null);
   const firstLoad = useRef(true);
+  const listInputRefs = useRef({});
+  const listIdCounter = useRef(0);
+  const listItems =
+    noteType === 'list' ? parseListContent(content) : [];
 
   useEffect(() => {
-    const c = note?.content || '';
     setTitle(note?.title || '');
-    setContent(c);
+    const loadedType = note ? (note.noteType === 'list' ? 'list' : 'text') : null;
+    const loadedContent = loadedType === 'list'
+      ? JSON.stringify(parseListContent(note?.content || ''))
+      : note?.content || '';
+    setContent(loadedContent);
     setPinned(note?.pinned || 0);
-    setListMode(detectListMode(c));
+    setNoteType(loadedType);
     undoStack.current = [];
     redoStack.current = [];
     firstLoad.current = true;
   }, [note, visible]);
 
-  const hasContent = () => title.trim().length > 0 || content.trim().length > 0;
+  const saveNote = useCallback(() => {
+    const hasNoteContent =
+      title.trim().length > 0 ||
+      (noteType === 'list'
+        ? parseListContent(content).some((item) => item.text.trim())
+        : content.trim().length > 0);
+    if (!noteType || !hasNoteContent) return;
+    onSave({
+      id: note?.id,
+      title,
+      content,
+      pinned,
+      noteType,
+      isLocked: note?.isLocked ? 1 : 0,
+    });
+  }, [content, note?.id, note?.isLocked, noteType, onSave, pinned, title]);
 
   useEffect(() => {
-    if (!note?.id) return;
+    if (!note?.id || !noteType) return;
     if (firstLoad.current) {
       firstLoad.current = false;
       return;
     }
-    if (!hasContent()) {
-      onDelete(note.id);
-      onClose();
-      return;
-    }
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      onSave({ id: note.id, title, content, pinned });
-    }, 800);
+    saveTimer.current = setTimeout(saveNote, 600);
     return () => clearTimeout(saveTimer.current);
-  }, [title, content, pinned]);
+  }, [note?.id, noteType, saveNote, title, content, pinned]);
 
-  const handleClose = () => {
-    if (!note?.id && hasContent()) onSave({ title, content, pinned });
+  const handleClose = useCallback(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveNote();
     onClose();
-  };
+  }, [onClose, saveNote]);
 
   useEffect(() => {
     if (!visible) return;
@@ -81,11 +113,21 @@ export default function NoteEditor({
       return true;
     });
     return () => sub.remove();
-  }, [visible, title, content]);
+  }, [visible, handleClose]);
 
   const handleSave = () => {
-    if (!hasContent()) return;
-    onSave({ id: note?.id, title, content, pinned });
+    if (!noteType) return;
+    const hasNoteContent =
+      title.trim().length > 0 ||
+      (noteType === 'list'
+        ? parseListContent(content).some((item) => item.text.trim())
+        : content.trim().length > 0);
+    if (!hasNoteContent) {
+      Alert.alert('নোট খালি', 'সেভ করার আগে কিছু লিখুন বা একটি task যোগ করুন।');
+      return;
+    }
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveNote();
     onClose();
   };
 
@@ -95,64 +137,26 @@ export default function NoteEditor({
       redoStack.current = [];
     }
     isUndoRedo.current = false;
-
-    if (listMode === 'number' && text.endsWith('\n')) {
-      const lines = text.split('\n');
-      const prev = lines[lines.length - 2] || '';
-      if (prev.match(/^(\d+)\.\s/)) {
-        const hasText = prev.replace(/^\d+\.\s/, '').trim().length > 0;
-        if (hasText) {
-          const n = Number(prev.match(/^(\d+)/)[1]) + 1;
-          lines[lines.length - 1] = `${n}. `;
-          setContent(lines.join('\n'));
-          return;
-        } else {
-          lines[lines.length - 2] = '';
-          lines[lines.length - 1] = '';
-          setListMode(null);
-          setContent(lines.join('\n'));
-          return;
-        }
-      }
-    }
     setContent(text);
   };
 
-  const activateList = () => {
-    setListMode('number');
-    setContent((prev) => {
-      const lines = prev.split('\n');
-      const lastLine = lines[lines.length - 1] || '';
-      if (/^\d+\.\s/.test(lastLine)) return prev;
-      let nextN = 1;
-      for (let i = lines.length - 1; i >= 0; i--) {
-        const m = lines[i].match(/^(\d+)\.\s/);
-        if (m) {
-          nextN = Number(m[1]) + 1;
-          break;
-        }
-      }
-      const prefix = `${nextN}. `;
-      return prev === '' || prev.endsWith('\n')
-        ? prev + prefix
-        : prev + '\n' + prefix;
-    });
+  const updateListItems = (items) => {
+    if (!isUndoRedo.current) {
+      undoStack.current.push(content);
+      redoStack.current = [];
+    }
+    isUndoRedo.current = false;
+    setContent(JSON.stringify(items));
   };
 
-  const activatePlain = () => {
-    setListMode(null);
-    setContent((prev) => {
-      const lines = prev.split('\n');
-      const lastLine = lines[lines.length - 1] || '';
-      if (
-        /^\d+\.\s/.test(lastLine) &&
-        lastLine.replace(/^\d+\.\s/, '').trim() === ''
-      ) {
-        lines.pop();
-        return lines.join('\n') + '\n';
-      }
-      return prev.endsWith('\n') ? prev : prev + '\n';
-    });
+  const makeListId = () => `list-${Date.now()}-${listIdCounter.current++}`;
+
+  const addListItem = (index) => {
+    const nextItems = [...listItems];
+    const nextItem = { id: makeListId(), text: '' };
+    nextItems.splice(index, 0, nextItem);
+    updateListItems(nextItems);
+    setTimeout(() => listInputRefs.current[nextItem.id]?.focus(), 50);
   };
 
   const undo = () => {
@@ -161,6 +165,7 @@ export default function NoteEditor({
     redoStack.current.push(content);
     setContent(undoStack.current.pop());
   };
+
   const redo = () => {
     if (!redoStack.current.length) return;
     isUndoRedo.current = true;
@@ -182,6 +187,15 @@ export default function NoteEditor({
     ]);
   };
 
+  const chooseType = (type) => {
+    setNoteType(type);
+    if (type === 'list') {
+      const firstItem = { id: makeListId(), text: '' };
+      setContent(JSON.stringify([firstItem]));
+      setTimeout(() => listInputRefs.current[firstItem.id]?.focus(), 50);
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -190,110 +204,241 @@ export default function NoteEditor({
       onRequestClose={handleClose}
     >
       <View style={styles.container}>
-        {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} style={styles.iconBtn}>
-            <Ionicons name='arrow-back' size={22} color='#1B1B1D' />
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.headerIcon}
+            accessibilityRole='button'
+            accessibilityLabel='নোট বন্ধ করুন'
+          >
+            <Ionicons name='arrow-back' size={22} color='#263330' />
           </TouchableOpacity>
-          {/* tool bar */}
-          <View style={styles.toolbar}>
-            <TouchableOpacity
-              onPress={undo}
-              disabled={!undoStack.current.length}
-              style={styles.toolBtn}
-            >
-              <MaterialCommunityIcons
-                name='undo'
-                size={22}
-                color={undoStack.current.length ? '#1B1B1D' : '#D7DCDC'}
-              />
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={redo}
-              disabled={!redoStack.current.length}
-              style={styles.toolBtn}
-            >
-              <MaterialCommunityIcons
-                name='redo'
-                size={22}
-                color={redoStack.current.length ? '#1B1B1D' : '#D7DCDC'}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={activatePlain}
-              style={[
-                styles.toolBtn,
-                listMode === null && styles.toolBtnActive,
-              ]}
-            >
-              <MaterialCommunityIcons
-                name='format-text'
-                size={22}
-                color={listMode === null ? '#2F4F4F' : '#3A3A3C'}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={activateList}
-              style={[
-                styles.toolBtn,
-                listMode === 'number' && styles.toolBtnActive,
-              ]}
-            >
-              <MaterialCommunityIcons
-                name='format-list-numbered'
-                size={22}
-                color={listMode === 'number' ? '#2F4F4F' : '#3A3A3C'}
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              onPress={() => setPinned((p) => (p ? 0 : 1))}
-              style={styles.iconBtn}
-            >
+          {noteType ? (
+            <View style={styles.typeBadge}>
               <Ionicons
-                name={pinned ? 'bookmark' : 'bookmark-outline'}
-                size={22}
-                color={pinned ? '#2F4F4F' : '#3A3A3C'}
+                name={noteType === 'list' ? 'list' : 'document-text-outline'}
+                size={15}
+                color='#52756F'
               />
+              <Text style={styles.typeBadgeText}>
+                {noteType === 'list' ? 'Numbered list' : 'Plain text'}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.headerTitle}>নতুন নোট</Text>
+          )}
+
+          <View style={styles.headerActions}>
+            {noteType ? (
+              <>
+                <TouchableOpacity
+                  onPress={undo}
+                  disabled={!undoStack.current.length}
+                  style={styles.headerIcon}
+                  accessibilityLabel='Undo'
+                >
+                  <Ionicons
+                    name='arrow-undo'
+                    size={20}
+                    color={undoStack.current.length ? '#52756F' : '#C9D1CE'}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={redo}
+                  disabled={!redoStack.current.length}
+                  style={styles.headerIcon}
+                  accessibilityLabel='Redo'
+                >
+                  <Ionicons
+                    name='arrow-redo'
+                    size={20}
+                    color={redoStack.current.length ? '#52756F' : '#C9D1CE'}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setPinned((current) => (current ? 0 : 1))}
+                  style={styles.headerIcon}
+                  accessibilityLabel={pinned ? 'Unpin note' : 'Pin note'}
+                >
+                  <Ionicons
+                    name={pinned ? 'bookmark' : 'bookmark-outline'}
+                    size={20}
+                    color={pinned ? '#52756F' : '#687571'}
+                  />
+                </TouchableOpacity>
+                {note?.id ? (
+                  <TouchableOpacity
+                    onPress={() =>
+                      onToggleLock?.({
+                        id: note.id,
+                        title,
+                        content,
+                        pinned,
+                        noteType,
+                        isLocked: note.isLocked ? 0 : 1,
+                      })
+                    }
+                    style={styles.headerIcon}
+                    accessibilityLabel={
+                      note.isLocked ? 'নোট আনলক করুন' : 'নোট লক করুন'
+                    }
+                  >
+                    <Ionicons
+                      name={note.isLocked ? 'lock-closed' : 'lock-open-outline'}
+                      size={19}
+                      color={note.isLocked ? '#A14F4F' : '#687571'}
+                    />
+                  </TouchableOpacity>
+                ) : null}
+              </>
+            ) : null}
+            <TouchableOpacity
+              onPress={handleSave}
+              style={[styles.saveButton, !noteType && styles.disabledSaveButton]}
+              disabled={!noteType}
+            >
+              <Ionicons name='checkmark' size={17} color='#FFFFFF' />
+              <Text style={styles.saveButtonText}>সেভ</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleSave} style={styles.saveBtn}>
-              <Ionicons name='checkmark' size={16} color='#fff' />
-              <Text style={styles.saveBtnText}>Save</Text>
-            </TouchableOpacity>
-            {note?.id && (
-              <TouchableOpacity onPress={confirmDelete} style={styles.iconBtn}>
-                <Ionicons name='trash-outline' size={20} color='#1B1B1D' />
+            {note?.id ? (
+              <TouchableOpacity
+                onPress={confirmDelete}
+                style={styles.headerIcon}
+                accessibilityLabel='নোট মুছুন'
+              >
+                <Ionicons name='trash-outline' size={20} color='#A14F4F' />
               </TouchableOpacity>
-            )}
+            ) : null}
           </View>
         </View>
 
-        {/* TITLE */}
-        <TextInput
-          style={styles.titleInput}
-          placeholder='শিরোনাম...'
-          placeholderTextColor='#D7DCDC'
-          value={title}
-          onChangeText={setTitle}
-          multiline
-        />
+        {!noteType ? (
+          <View style={styles.typePicker}>
+            <View style={styles.pickerIcon}>
+              <Ionicons name='document-text-outline' size={28} color='#52756F' />
+            </View>
+            <Text style={styles.pickerTitle}>কী ধরনের নোট লিখবেন?</Text>
+            <Text style={styles.pickerDescription}>
+              নোট তৈরি হওয়ার পর এর ধরন স্থায়ী থাকবে।
+            </Text>
 
-        <View style={styles.divider} />
+            <TouchableOpacity
+              style={styles.typeOption}
+              onPress={() => chooseType('text')}
+              activeOpacity={0.75}
+            >
+              <View style={[styles.optionIcon, styles.textOptionIcon]}>
+                <Ionicons name='reader-outline' size={23} color='#52756F' />
+              </View>
+              <View style={styles.optionCopy}>
+                <Text style={styles.optionTitle}>Plain text</Text>
+                <Text style={styles.optionDescription}>
+                  ভাবনা, তথ্য বা বিস্তারিত লিখে রাখুন
+                </Text>
+              </View>
+              <Ionicons name='chevron-forward' size={19} color='#A3AEAA' />
+            </TouchableOpacity>
 
-        {/* CONTENT — নিচে toolbar + keyboard এর জায়গা রাখো */}
-        <TextInput
-          style={styles.contentInput}
-          placeholder='লিখুন...'
-          placeholderTextColor='#D7DCDC'
-          multiline
-          value={content}
-          onChangeText={handleContentChange}
-          textAlignVertical='top'
-        />
+            <TouchableOpacity
+              style={styles.typeOption}
+              onPress={() => chooseType('list')}
+              activeOpacity={0.75}
+            >
+              <View style={[styles.optionIcon, styles.listOptionIcon]}>
+                <Ionicons name='list' size={23} color='#65708F' />
+              </View>
+              <View style={styles.optionCopy}>
+                <Text style={styles.optionTitle}>Numbered list</Text>
+                <Text style={styles.optionDescription}>
+                  প্রতিটি লাইনে ১, ২, ৩ নম্বর দিয়ে কাজ সাজিয়ে রাখুন
+                </Text>
+              </View>
+              <Ionicons name='chevron-forward' size={19} color='#A3AEAA' />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <TextInput
+              style={styles.titleInput}
+              placeholder='শিরোনাম'
+              placeholderTextColor='#9AA5A1'
+              value={title}
+              onChangeText={setTitle}
+              multiline
+              maxLength={120}
+            />
+            <View style={styles.titleDivider} />
+
+            {noteType === 'list' ? (
+              <ScrollView
+                style={styles.listEditor}
+                contentContainerStyle={styles.listContent}
+                keyboardShouldPersistTaps='handled'
+                showsVerticalScrollIndicator={false}
+              >
+                {listItems.map((item, index) => (
+                  <View key={item.id} style={styles.listRow}>
+                    <View style={styles.listNumber}>
+                      <Text style={styles.listNumberText}>{index + 1}</Text>
+                    </View>
+                    <TextInput
+                      ref={(ref) => {
+                        if (ref) listInputRefs.current[item.id] = ref;
+                        else delete listInputRefs.current[item.id];
+                      }}
+                      style={styles.listItemInput}
+                      value={item.text}
+                      onChangeText={(text) =>
+                        updateListItems(
+                          listItems.map((current) =>
+                            current.id === item.id ? { ...current, text } : current,
+                          ),
+                        )
+                      }
+                      onSubmitEditing={() => addListItem(index + 1)}
+                      placeholder='একটি item লিখুন'
+                      placeholderTextColor='#A3AEAA'
+                      returnKeyType='next'
+                      blurOnSubmit={false}
+                      accessibilityLabel={`List item ${index + 1}`}
+                    />
+                    <TouchableOpacity
+                      onPress={() =>
+                        updateListItems(
+                          listItems.filter((current) => current.id !== item.id),
+                        )
+                      }
+                      style={styles.removeListItem}
+                      accessibilityRole='button'
+                      accessibilityLabel={`Item ${index + 1} মুছুন`}
+                    >
+                      <Ionicons name='close' size={18} color='#A3AEAA' />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <TouchableOpacity
+                  style={styles.addListItem}
+                  onPress={() => addListItem(listItems.length)}
+                  activeOpacity={0.75}
+                >
+                  <Ionicons name='add-circle-outline' size={21} color='#52756F' />
+                  <Text style={styles.addListItemText}>আরেকটি item যোগ করুন</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            ) : (
+              <TextInput
+                style={styles.contentInput}
+                placeholder='আপনার নোট এখানে লিখুন...'
+                placeholderTextColor='#A3AEAA'
+                multiline
+                value={content}
+                onChangeText={handleContentChange}
+                textAlignVertical='top'
+              />
+            )}
+          </>
+        )}
       </View>
     </Modal>
   );
@@ -302,55 +447,214 @@ export default function NoteEditor({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
-    paddingTop: 48,
+    backgroundColor: '#F5F7F6',
+    paddingTop: 42,
   },
   header: {
+    minHeight: 54,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
     paddingBottom: 8,
   },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  iconBtn: { padding: 8, borderRadius: 10 },
-
-  toolbar: {
+  headerTitle: {
+    color: '#263330',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  headerIcon: {
+    minWidth: 36,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
   },
-  toolBtn: { padding: 8, borderRadius: 10 },
-  toolBtnActive: { backgroundColor: '#ede9fe' },
-  saveBtn: {
+  typeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#E8EFEC',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 20,
+  },
+  typeBadgeText: {
+    color: '#52756F',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: '#2F4F4F',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 18,
+    marginLeft: 3,
   },
-  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  titleInput: {
-    fontSize: 22,
-    fontWeight: '700',
+  disabledSaveButton: {
+    opacity: 0.45,
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  typePicker: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 22,
+    paddingBottom: 55,
+  },
+  pickerIcon: {
+    width: 58,
+    height: 58,
+    borderRadius: 19,
+    backgroundColor: '#E4ECE8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 19,
+  },
+  pickerTitle: {
     color: '#1B1B1D',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    fontSize: 25,
+    fontWeight: '800',
+    letterSpacing: -0.4,
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#D7DCDC',
-    marginHorizontal: 20,
+  pickerDescription: {
+    color: '#718181',
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 7,
+    marginBottom: 24,
+  },
+  typeOption: {
+    minHeight: 83,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: '#E6ECE9',
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    marginBottom: 11,
+  },
+  optionIcon: {
+    width: 45,
+    height: 45,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  textOptionIcon: {
+    backgroundColor: '#EAF1ED',
+  },
+  listOptionIcon: {
+    backgroundColor: '#EEF0F6',
+  },
+  optionCopy: {
+    flex: 1,
+    marginRight: 8,
+  },
+  optionTitle: {
+    color: '#263330',
+    fontSize: 14,
+    fontWeight: '800',
     marginBottom: 4,
+  },
+  optionDescription: {
+    color: '#7B8783',
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  titleInput: {
+    color: '#1B1B1D',
+    fontSize: 25,
+    fontWeight: '800',
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+    minHeight: 58,
+  },
+  titleDivider: {
+    height: 1,
+    backgroundColor: '#E1E7E4',
+    marginHorizontal: 20,
+    marginBottom: 5,
   },
   contentInput: {
     flex: 1,
+    color: '#34413D',
     fontSize: 15,
-    color: '#1f2937',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    lineHeight: 26,
+    lineHeight: 25,
+    paddingHorizontal: 22,
+    paddingTop: 13,
+    paddingBottom: 28,
+  },
+  listEditor: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: 18,
+    paddingTop: 13,
+    paddingBottom: 20,
+  },
+  listRow: {
+    minHeight: 54,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7ECE9',
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    marginBottom: 9,
+  },
+  listNumber: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    backgroundColor: '#E8EFEC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  listNumberText: {
+    color: '#52756F',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  listItemInput: {
+    flex: 1,
+    color: '#34413D',
+    fontSize: 14,
+    paddingVertical: 13,
+  },
+  removeListItem: {
+    width: 32,
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addListItem: {
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    paddingHorizontal: 5,
+    marginTop: 2,
+  },
+  addListItemText: {
+    color: '#52756F',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
