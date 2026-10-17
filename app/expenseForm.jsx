@@ -73,7 +73,7 @@ export default function ExpenseForm() {
               ]}
               onPress={() => setReason(item)}
             >
-              <Text style={{ color: '#3A3A3C' }}>{item}</Text>
+              <Text style={{ color: '#2F4F4F' }}>{item}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -88,7 +88,7 @@ export default function ExpenseForm() {
               ]}
               onPress={() => setReason(item)}
             >
-              <Text style={{ color: '#3A3A3C' }}>{item}</Text>
+              <Text style={{ color: '#2F4F4F' }}>{item}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -107,7 +107,7 @@ export default function ExpenseForm() {
           style={styles.input}
           onPress={() => setShowPicker(true)}
         >
-          <Text style={{ color: '#3A3A3C' }}>{BDDateTime(selectedDate)}</Text>
+          <Text style={{ color: '#2F4F4F' }}>{BDDateTime(selectedDate)}</Text>
         </TouchableOpacity>
 
         {showPicker && (
@@ -125,16 +125,13 @@ export default function ExpenseForm() {
         {/* Buttons */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            style={[styles.button, styles.backButton]}
+            style={styles.button}
             onPress={() => router.push('/')}
           >
-            <Text style={styles.buttonText}>ফিরে যান</Text>
+            <Text style={styles.buttonText}>Back</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.submitButton]}
-            onPress={handleSubmit}
-          >
-            <Text style={styles.buttonText}>হিসাব করুন</Text>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Save</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -171,14 +168,13 @@ const styles = StyleSheet.create({
     color: '#2F4F4F',
   },
   input: {
-    backgroundColor: '#EAEDED',
-    // boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     padding: 12,
     paddingLeft: 16,
     marginBottom: 12,
-    borderWidth: 0.5,
-    borderColor: '#D7DCDC',
+    borderWidth: 1,
+    borderColor: '#dcccae',
   },
 
   iconRow: {
@@ -191,13 +187,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 10,
-    // boxShadow: '0 8px 20px rgba(27, 27, 29, 0.08)',
+    boxShadow: '-2px 2px 20px 1px #2f4f4f1c',
     borderRadius: 12,
-    backgroundColor: '#EAEDED',
-    borderWidth: 0.5,
-    borderColor: '#D7DCDC',
+    backgroundColor: '#ffffff',
   },
-  selectedIconButton: { backgroundColor: '#aeb2b2' },
+  selectedIconButton: { backgroundColor: '#f8f0df' },
 
   buttonRow: {
     flexDirection: 'row',
@@ -210,14 +204,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     marginHorizontal: 4,
+    boxShadow: '-2px 2px 20px 1px #2f4f4f2e',
+    backgroundColor: '#ffffff',
   },
 
-  backButton: { backgroundColor: '#3A3A3C' },
-  submitButton: { backgroundColor: '#2F4F4F' },
-  buttonText: { color: '#EAEDED', fontWeight: 'bold' },
+  buttonText: { color: '#2F4F4F', fontWeight: 'semi-bold' },
   calcFloatBtn: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 140,
     right: 20,
     backgroundColor: '#f0e9dc',
     padding: 16,

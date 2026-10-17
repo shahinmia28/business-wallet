@@ -1,4 +1,3 @@
-import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -111,12 +110,12 @@ export default function Today() {
         />
       )}
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.homeButton}
         onPress={() => router.push('/')}
       >
         <FontAwesome name='home' size={24} color='white' />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }
@@ -155,12 +154,12 @@ const styles = StyleSheet.create({
   itemText: { flex: 1, textAlign: 'center' },
   incomeText: { color: '#2F4F4F', fontWeight: 'bold' },
   expenseText: { color: '#1B1B1D', fontWeight: 'bold' },
-  homeButton: {
-    position: 'absolute',
-    bottom: 100,
-    right: 20,
-    backgroundColor: '#2F4F4F',
-    padding: 16,
-    borderRadius: 50,
-  },
+  // homeButton: {
+  //   position: 'absolute',
+  //   bottom: 100,
+  //   right: 20,
+  //   backgroundColor: '#2F4F4F',
+  //   padding: 16,
+  //   borderRadius: 50,
+  // },
 });

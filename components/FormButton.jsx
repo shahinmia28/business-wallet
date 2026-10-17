@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#ffffff',
 
-    boxShadow: '-2px 10px 20px 1px rgba(27, 27, 29, 0.125)',
+    boxShadow: '-2px 5px 20px 1px rgba(27, 27, 29, 0.125)',
   },
   label: {
     fontWeight: 'semi-bold',

@@ -52,57 +52,80 @@ export default function NoteEditor({
   const redoStack = useRef([]);
   const isUndoRedo = useRef(false);
   const saveTimer = useRef(null);
-  const firstLoad = useRef(true);
+  const saveQueue = useRef(Promise.resolve());
+  const onSaveRef = useRef(onSave);
+  const noteRef = useRef(note);
   const listInputRefs = useRef({});
   const listIdCounter = useRef(0);
   const listItems =
     noteType === 'list' ? parseListContent(content) : [];
 
+  onSaveRef.current = onSave;
+  noteRef.current = note;
+
   useEffect(() => {
-    setTitle(note?.title || '');
-    const loadedType = note ? (note.noteType === 'list' ? 'list' : 'text') : null;
+    if (!visible) return;
+    const activeNote = noteRef.current;
+    setTitle(activeNote?.title || '');
+    const loadedType = activeNote
+      ? activeNote.noteType === 'list'
+        ? 'list'
+        : 'text'
+      : null;
     const loadedContent = loadedType === 'list'
-      ? JSON.stringify(parseListContent(note?.content || ''))
-      : note?.content || '';
+      ? JSON.stringify(parseListContent(activeNote?.content || ''))
+      : activeNote?.content || '';
     setContent(loadedContent);
-    setPinned(note?.pinned || 0);
+    setPinned(activeNote?.pinned || 0);
     setNoteType(loadedType);
     undoStack.current = [];
     redoStack.current = [];
-    firstLoad.current = true;
-  }, [note, visible]);
+  }, [note?.id, visible]);
 
-  const saveNote = useCallback(() => {
+  const saveNote = useCallback(async () => {
     const hasNoteContent =
       title.trim().length > 0 ||
       (noteType === 'list'
         ? parseListContent(content).some((item) => item.text.trim())
         : content.trim().length > 0);
-    if (!noteType || !hasNoteContent) return;
-    onSave({
+    if (!noteType || !hasNoteContent) return false;
+    const noteData = {
       id: note?.id,
       title,
       content,
       pinned,
       noteType,
       isLocked: note?.isLocked ? 1 : 0,
-    });
-  }, [content, note?.id, note?.isLocked, noteType, onSave, pinned, title]);
+    };
+    const saveOperation = saveQueue.current
+      .catch(() => {})
+      .then(() => onSaveRef.current(noteData));
+    saveQueue.current = saveOperation;
+    await saveOperation;
+    return true;
+  }, [content, note?.id, note?.isLocked, noteType, pinned, title]);
 
   useEffect(() => {
     if (!note?.id || !noteType) return;
-    if (firstLoad.current) {
-      firstLoad.current = false;
-      return;
-    }
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(saveNote, 600);
+    saveTimer.current = setTimeout(() => {
+      saveNote().catch((error) => {
+        console.warn('note auto-save failed', error);
+        Alert.alert('সমস্যা হয়েছে', 'নোট সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।');
+      });
+    }, 600);
     return () => clearTimeout(saveTimer.current);
   }, [note?.id, noteType, saveNote, title, content, pinned]);
 
-  const handleClose = useCallback(() => {
+  const handleClose = useCallback(async () => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveNote();
+    try {
+      await saveNote();
+    } catch (error) {
+      console.warn('note save on close failed', error);
+      Alert.alert('সমস্যা হয়েছে', 'নোট সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।');
+      return;
+    }
     onClose();
   }, [onClose, saveNote]);
 
@@ -115,7 +138,7 @@ export default function NoteEditor({
     return () => sub.remove();
   }, [visible, handleClose]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!noteType) return;
     const hasNoteContent =
       title.trim().length > 0 ||
@@ -127,8 +150,13 @@ export default function NoteEditor({
       return;
     }
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveNote();
-    onClose();
+    try {
+      await saveNote();
+      onClose();
+    } catch (error) {
+      console.warn('note save failed', error);
+      Alert.alert('সমস্যা হয়েছে', 'নোট সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।');
+    }
   };
 
   const handleContentChange = (text) => {

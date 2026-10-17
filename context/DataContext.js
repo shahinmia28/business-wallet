@@ -69,7 +69,7 @@ export const DataProvider = ({ children }) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
-    fetchData();
+    await fetchData();
   };
 
   const editNote = async (note) => {

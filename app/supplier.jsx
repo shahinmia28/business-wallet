@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   emptyAddText: {
-    color: '#00692f',
+    color: '#ffffff',
     fontWeight: 'bold',
     fontSize: 14,
   },

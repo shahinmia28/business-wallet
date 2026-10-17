@@ -228,9 +228,11 @@ export default function All() {
         stickyHeaderIndices={[0]}
         style={{ backgroundColor: '#ffffff' }}
       />
-      <TouchableOpacity style={styles.homeBtn} onPress={() => router.push('/')}>
+
+      {/* <TouchableOpacity style={styles.homeBtn} onPress={() => router.push('/')}>
         <FontAwesome name='home' size={22} color='white' />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+
       {showOptionModal && selectedItem && (
         <EditDeleteModal
           item={selectedItem}

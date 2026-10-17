@@ -344,12 +344,11 @@ export default function NotesPage() {
         note={selectedNote}
         onClose={() => setShowEditor(false)}
         onToggleLock={handleToggleLock}
-        onSave={(data) => {
+        onSave={async (data) => {
           if (data.id) {
-            editNote(data);
+            await editNote(data);
           } else {
-            addNote({ ...data, pinned: 0 });
-            setShowEditor(false);
+            await addNote({ ...data, pinned: data.pinned ?? 0 });
           }
         }}
         onDelete={(id) => {

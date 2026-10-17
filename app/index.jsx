@@ -25,8 +25,22 @@ export default function Home() {
 
       <View style={styles.openCalcBtnContainer}>
         {calcResult !== null && (
-          <Text style={{ marginBottom: 10, fontSize: 12, color: '#3A3A3C' }}>
-            Result = {calcResult}
+          <Text
+            selectable
+            style={{
+              marginBottom: 10,
+              fontSize: 20,
+              fontWeight: 'bold',
+              borderColor: '#f0e9dc',
+              borderWidth: 1.5,
+              paddingHorizontal: 15,
+              borderRadius: 8,
+
+              color: '#2F4F4F',
+              textSize: '12px',
+            }}
+          >
+            {calcResult}
           </Text>
         )}
         <TouchableOpacity
