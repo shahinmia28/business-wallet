@@ -6,16 +6,20 @@ import {
   getAllCustomerTransactionsForBackup,
   getAllExpenses,
   getAllIncomes,
+  getAllMemos,
   getAllNotes,
+  getShopProfile,
   getAllSuppliers,
   getAllSupplierTransactionsForBackup,
   insertCustomer,
   insertCustomerTransaction,
   insertExpense,
   insertIncome,
+  insertMemo,
   insertNote,
   insertSupplier,
   insertSupplierTransaction,
+  saveShopProfile,
 } from '../database/db';
 
 const BACKUP_VERSION = 1;
@@ -33,6 +37,8 @@ export async function createBackup() {
     customers,
     customerTransactions,
     notes,
+    memos,
+    shopProfile,
   ] = await Promise.all([
     getAllExpenses(),
     getAllIncomes(),
@@ -41,6 +47,8 @@ export async function createBackup() {
     getAllCustomers(),
     getAllCustomerTransactionsForBackup(),
     getAllNotes(),
+    getAllMemos(),
+    getShopProfile(),
   ]);
 
   const portableCustomers = customers.map(
@@ -60,6 +68,8 @@ export async function createBackup() {
     customers: portableCustomers,
     customerTransactions,
     notes,
+    memos,
+    shopProfile,
   };
 
   // তারিখ সহ ফাইল নাম
@@ -124,6 +134,7 @@ export async function restoreBackup() {
     customers: 0,
     customerTx: 0,
     notes: 0,
+    memos: 0,
   };
 
   // ── বিদ্যমান ডেটা লোড (duplicate check এর জন্য) ──
@@ -135,6 +146,7 @@ export async function restoreBackup() {
     exCustomers,
     exCustomerTx,
     exNotes,
+    exMemos,
   ] = await Promise.all([
     getAllExpenses(),
     getAllIncomes(),
@@ -143,6 +155,7 @@ export async function restoreBackup() {
     getAllCustomers(),
     getAllCustomerTransactionsForBackup(),
     getAllNotes(),
+    getAllMemos(),
   ]);
 
   // ── EXPENSES ──
@@ -302,6 +315,41 @@ export async function restoreBackup() {
       });
       stats.notes++;
     }
+  }
+
+  // ── CASH MEMOS ──
+  for (const memo of backup.memos || []) {
+    const duplicate = exMemos.some(
+      (existing) => existing.createdAt === memo.createdAt,
+    );
+    if (!duplicate) {
+      await insertMemo({
+        customerName: memo.customerName,
+        phone: memo.phone,
+        address: memo.address,
+        note: memo.note,
+        date: memo.date,
+        items: memo.items || [],
+        discountValue: memo.discountValue,
+        discountType: memo.discountType,
+        shopName: memo.shopName,
+        shopPhone: memo.shopPhone,
+        shopAddress: memo.shopAddress,
+        shopDescription: memo.shopDescription,
+        createdAt: memo.createdAt,
+        updatedAt: memo.updatedAt,
+      });
+      stats.memos++;
+    }
+  }
+
+  if (backup.shopProfile) {
+    await saveShopProfile({
+      name: backup.shopProfile.name || '',
+      phone: backup.shopProfile.phone || '',
+      address: backup.shopProfile.address || '',
+      description: backup.shopProfile.description || '',
+    });
   }
 
   return { canceled: false, stats };

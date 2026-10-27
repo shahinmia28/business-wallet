@@ -54,6 +54,7 @@ export default function BackupPage() {
                 s.customers && `কাস্টমার: ${s.customers}`,
                 s.customerTx && `কাস্টমার লেনদেন: ${s.customerTx}`,
                 s.notes && `নোট: ${s.notes}`,
+                s.memos && `ক্যাশ মেমো: ${s.memos}`,
               ]
                 .filter(Boolean)
                 .join(', ');

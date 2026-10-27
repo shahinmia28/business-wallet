@@ -60,6 +60,15 @@ export const insertNote = notSupported('insertNote');
 export const updateNote = notSupported('updateNote');
 export const deleteNoteById = notSupported('deleteNoteById');
 
+// Cash memos
+export const getAllMemos = async () => [];
+export const getMemoById = async () => null;
+export const insertMemo = notSupported('insertMemo');
+export const updateMemo = notSupported('updateMemo');
+export const deleteMemoById = notSupported('deleteMemoById');
+export const getShopProfile = async () => null;
+export const saveShopProfile = notSupported('saveShopProfile');
+
 /* ===== CUSTOMERS ===== */
 export const getAllCustomers = async () => [];
 export const getAllCustomersIncludingInactive = async () => [];

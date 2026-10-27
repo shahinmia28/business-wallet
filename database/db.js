@@ -47,6 +47,15 @@ export const {
   updateNote,
   deleteNoteById,
 
+  // Cash memos
+  getAllMemos,
+  getMemoById,
+  insertMemo,
+  updateMemo,
+  deleteMemoById,
+  getShopProfile,
+  saveShopProfile,
+
   // Customers
   getAllCustomers,
   getAllCustomersIncludingInactive,

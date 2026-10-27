@@ -184,6 +184,55 @@ export const initDB = async () => {
         );
       `,
     },
+    {
+      name: 'create_cash_memos_table',
+      query: `
+        CREATE TABLE IF NOT EXISTS cash_memos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          customerName TEXT NOT NULL DEFAULT '',
+          phone TEXT DEFAULT '',
+          address TEXT DEFAULT '',
+          note TEXT DEFAULT '',
+          date TEXT NOT NULL,
+          items TEXT NOT NULL DEFAULT '[]',
+          discountValue REAL NOT NULL DEFAULT 0,
+          discountType TEXT NOT NULL DEFAULT 'fixed',
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_cash_memos_date
+        ON cash_memos(date DESC, id DESC);
+      `,
+    },
+    {
+      name: 'create_memo_shop_profile_table',
+      query: `
+        CREATE TABLE IF NOT EXISTS memo_shop_profile (
+          id INTEGER PRIMARY KEY CHECK (id = 1),
+          name TEXT NOT NULL DEFAULT '',
+          phone TEXT NOT NULL DEFAULT '',
+          address TEXT NOT NULL DEFAULT '',
+          description TEXT NOT NULL DEFAULT '',
+          updatedAt TEXT NOT NULL
+        );
+      `,
+    },
+    {
+      name: 'add_cash_memo_shop_name_column',
+      query: `ALTER TABLE cash_memos ADD COLUMN shopName TEXT NOT NULL DEFAULT '';`,
+    },
+    {
+      name: 'add_cash_memo_shop_phone_column',
+      query: `ALTER TABLE cash_memos ADD COLUMN shopPhone TEXT NOT NULL DEFAULT '';`,
+    },
+    {
+      name: 'add_cash_memo_shop_address_column',
+      query: `ALTER TABLE cash_memos ADD COLUMN shopAddress TEXT NOT NULL DEFAULT '';`,
+    },
+    {
+      name: 'add_cash_memo_shop_description_column',
+      query: `ALTER TABLE cash_memos ADD COLUMN shopDescription TEXT NOT NULL DEFAULT '';`,
+    },
   ];
 
   // 3️⃣ Run migrations that are not applied
@@ -608,6 +657,132 @@ export const updateNote = async ({
 
 export const deleteNoteById = async (id) =>
   await db.runAsync('DELETE FROM notes WHERE id=?;', [id]);
+
+/* ===================== CASH MEMOS ===================== */
+const parseMemo = (memo) => ({
+  ...memo,
+  items: JSON.parse(memo.items || '[]'),
+});
+
+export const getAllMemos = async () => {
+  const rows = await db.getAllAsync(
+    'SELECT * FROM cash_memos ORDER BY date DESC, id DESC;',
+  );
+  return rows.map(parseMemo);
+};
+
+export const getMemoById = async (id) => {
+  const memo = await db.getFirstAsync(
+    'SELECT * FROM cash_memos WHERE id=?;',
+    [id],
+  );
+  return memo ? parseMemo(memo) : null;
+};
+
+export const insertMemo = async ({
+  customerName,
+  phone,
+  address,
+  note,
+  date,
+  items = [],
+  discountValue = 0,
+  discountType = 'fixed',
+  shopName = '',
+  shopPhone = '',
+  shopAddress = '',
+  shopDescription = '',
+  createdAt,
+  updatedAt,
+}) => {
+  const timestamp = currentTimestamp();
+  return db.runAsync(
+    `INSERT INTO cash_memos
+      (customerName, phone, address, note, date, items, discountValue, discountType,
+       shopName, shopPhone, shopAddress, shopDescription, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+    [
+      customerName || '',
+      phone || '',
+      address || '',
+      note || '',
+      date,
+      JSON.stringify(items),
+      Number(discountValue) || 0,
+      discountType === 'percent' ? 'percent' : 'fixed',
+      shopName,
+      shopPhone,
+      shopAddress,
+      shopDescription,
+      createdAt || timestamp,
+      updatedAt || createdAt || timestamp,
+    ],
+  );
+};
+
+export const updateMemo = async ({
+  id,
+  customerName,
+  phone,
+  address,
+  note,
+  date,
+  items,
+  discountValue,
+  discountType,
+  shopName,
+  shopPhone,
+  shopAddress,
+  shopDescription,
+}) =>
+  db.runAsync(
+    `UPDATE cash_memos
+     SET customerName=?, phone=?, address=?, note=?, date=?, items=?,
+         discountValue=?, discountType=?, shopName=?, shopPhone=?, shopAddress=?,
+         shopDescription=?, updatedAt=?
+     WHERE id=?;`,
+    [
+      customerName || '',
+      phone || '',
+      address || '',
+      note || '',
+      date,
+      JSON.stringify(items || []),
+      Number(discountValue) || 0,
+      discountType === 'percent' ? 'percent' : 'fixed',
+      shopName || '',
+      shopPhone || '',
+      shopAddress || '',
+      shopDescription || '',
+      currentTimestamp(),
+      id,
+    ],
+  );
+
+export const deleteMemoById = async (id) =>
+  db.runAsync('DELETE FROM cash_memos WHERE id=?;', [id]);
+
+export const getShopProfile = async () =>
+  db.getFirstAsync('SELECT * FROM memo_shop_profile WHERE id=1;');
+
+export const saveShopProfile = async ({ name, phone, address, description }) =>
+  db.runAsync(
+    `INSERT INTO memo_shop_profile (id, name, phone, address, description, updatedAt)
+     VALUES (1, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       name=excluded.name,
+       phone=excluded.phone,
+       address=excluded.address,
+       description=excluded.description,
+       updatedAt=excluded.updatedAt;`,
+    [
+      name.trim(),
+      phone.trim(),
+      address.trim(),
+      description.trim(),
+      currentTimestamp(),
+    ],
+  );
 
 export default db;
 

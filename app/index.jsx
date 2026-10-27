@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 
 import { FontAwesome } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import Calculator from '../components/Calculator'; // Import your calculator
 import CardMenu from '../components/CardMenu';
 import FormButton from '../components/FormButton';
@@ -22,6 +23,15 @@ export default function Home() {
       <Summary />
       <CardMenu />
       <FormButton />
+
+      <TouchableOpacity
+        style={styles.openMemoBtn}
+        onPress={() => router.push('/memo')}
+        accessibilityRole='button'
+        accessibilityLabel='ক্যাশ মেমো তৈরি করুন'
+      >
+        <FontAwesome name='file-text-o' size={29} color='#2F4F4F' />
+      </TouchableOpacity>
 
       <View style={styles.openCalcBtnContainer}>
         {calcResult !== null && (
@@ -81,6 +91,17 @@ const styles = StyleSheet.create({
     bottom: 100,
     right: 30,
     alignItems: 'center',
+  },
+  openMemoBtn: {
+    position: 'absolute',
+    bottom: 100,
+    left: 30,
+    width: 67,
+    height: 67,
+    backgroundColor: '#f0e9dc',
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   openCalcBtnText: {
     color: '#1B1B1D',

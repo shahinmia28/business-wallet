@@ -48,3 +48,12 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Cash memos
+
+Create and manage customer cash memos from the home screen. Memo records include
+customer details, dated product line items, fixed or percentage discounts, and
+PDF sharing/printing. Shop details are saved once and added to new memos
+automatically. PDF export supports A4 and 58mm/80mm thermal receipt layouts;
+select the matching paper width in the printer app when printing a thermal memo.
+Cash memos and shop details are included in app backups.
