@@ -3,7 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   BackHandler,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import useKeyboardHeight from '../hooks/useKeyboardHeight';
 
 const parseListContent = (content) => {
   try {
@@ -44,6 +47,7 @@ export default function NoteEditor({
   onToggleLock,
   onClose,
 }) {
+  const keyboardHeight = useKeyboardHeight();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [pinned, setPinned] = useState(0);
@@ -231,7 +235,10 @@ export default function NoteEditor({
       transparent={false}
       onRequestClose={handleClose}
     >
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <View style={styles.header}>
           <TouchableOpacity
             onPress={handleClose}
@@ -341,6 +348,16 @@ export default function NoteEditor({
           </View>
         </View>
 
+        <ScrollView
+          style={styles.editorScrollView}
+          contentContainerStyle={[
+            styles.editorScrollContent,
+            { paddingBottom: keyboardHeight ? keyboardHeight + 98 : 24 },
+          ]}
+          keyboardShouldPersistTaps='handled'
+          keyboardDismissMode='none'
+          showsVerticalScrollIndicator={false}
+        >
         {!noteType ? (
           <View style={styles.typePicker}>
             <View style={styles.pickerIcon}>
@@ -403,6 +420,7 @@ export default function NoteEditor({
                 style={styles.listEditor}
                 contentContainerStyle={styles.listContent}
                 keyboardShouldPersistTaps='handled'
+                keyboardDismissMode='none'
                 showsVerticalScrollIndicator={false}
               >
                 {listItems.map((item, index) => (
@@ -467,7 +485,8 @@ export default function NoteEditor({
             )}
           </>
         )}
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -478,6 +497,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F7F6',
     paddingTop: 42,
   },
+  editorScrollView: { flex: 1 },
+  editorScrollContent: { flexGrow: 1 },
   header: {
     minHeight: 54,
     flexDirection: 'row',
@@ -605,12 +626,14 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   titleInput: {
-    color: '#1B1B1D',
-    fontSize: 25,
+    color: '#20312D',
+    fontSize: 24,
     fontWeight: '800',
     paddingHorizontal: 22,
-    paddingVertical: 14,
-    minHeight: 58,
+    paddingVertical: 16,
+    minHeight: 60,
+    lineHeight: 32,
+    letterSpacing: 0.1,
   },
   titleDivider: {
     height: 1,
@@ -620,36 +643,37 @@ const styles = StyleSheet.create({
   },
   contentInput: {
     flex: 1,
-    color: '#34413D',
-    fontSize: 15,
-    lineHeight: 25,
+    color: '#303D39',
+    fontSize: 16,
+    lineHeight: 28,
+    letterSpacing: 0.15,
     paddingHorizontal: 22,
-    paddingTop: 13,
-    paddingBottom: 28,
+    paddingTop: 17,
+    paddingBottom: 32,
   },
   listEditor: {
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: 18,
-    paddingTop: 13,
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 24,
   },
   listRow: {
-    minHeight: 54,
+    minHeight: 58,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E7ECE9',
-    borderRadius: 16,
-    paddingHorizontal: 10,
-    marginBottom: 9,
+    borderColor: '#E3EAE6',
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    marginBottom: 10,
   },
   listNumber: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 11,
     backgroundColor: '#E8EFEC',
     alignItems: 'center',
     justifyContent: 'center',
@@ -662,9 +686,11 @@ const styles = StyleSheet.create({
   },
   listItemInput: {
     flex: 1,
-    color: '#34413D',
-    fontSize: 14,
-    paddingVertical: 13,
+    color: '#303D39',
+    fontSize: 15,
+    lineHeight: 23,
+    letterSpacing: 0.1,
+    paddingVertical: 15,
   },
   removeListItem: {
     width: 32,

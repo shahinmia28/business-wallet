@@ -17,7 +17,7 @@ import {
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { getMemoById, updateMemo } from '../../database/db';
+import { getMemoById, getShopProfile, updateMemo } from '../../database/db';
 import useKeyboardHeight from '../../hooks/useKeyboardHeight';
 import { shareCashMemoPdf } from '../../utils/cashMemoPdf';
 import { pickPhoneFromContacts } from '../../utils/contactPicker';
@@ -269,7 +269,18 @@ export default function MemoDetailPage() {
     try {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       const saved = await saveMemo();
-      await shareCashMemoPdf(saved, paperSize);
+      const shopProfile = await getShopProfile();
+      await shareCashMemoPdf(
+        {
+          ...saved,
+          shopName: shopProfile?.name ?? saved.shopName,
+          shopPhone: shopProfile?.phone ?? saved.shopPhone,
+          shopAddress: shopProfile?.address ?? saved.shopAddress,
+          shopDescription:
+            shopProfile?.description ?? saved.shopDescription,
+        },
+        paperSize,
+      );
     } catch (error) {
       console.error('Cash memo PDF generation or share failed', error);
       Alert.alert(
