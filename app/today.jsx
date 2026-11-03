@@ -42,6 +42,18 @@ export default function Today() {
     .filter((i) => i.type === 'expense')
     .reduce((sum, i) => sum + Number(i.amount), 0);
 
+  const totalProducts = filteredData.filter(
+    (item) => item.type === 'income',
+  ).length;
+  const profitPercent =
+    totalSell === 0 ? 0 : Math.round((totalIncome / totalSell) * 100);
+  const expensePercent =
+    totalIncome === 0 ? 0 : Math.round((totalExpense / totalIncome) * 100);
+  const balancePercent =
+    totalIncome === 0
+      ? 0
+      : Math.round(((totalIncome - totalExpense) / totalIncome) * 100);
+
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={[
@@ -84,7 +96,27 @@ export default function Today() {
           <>
             <View style={styles.summaryContainer}>
               <View style={styles.titleBox}>
-                <Text style={styles.summaryTitle}>{totalIncome}</Text>
+                <Text style={styles.titleLabel}>আজকের মোট পণ্য</Text>
+                <Text style={styles.summaryTitle}>{totalProducts}টি</Text>
+                <View style={styles.percentRow}>
+                  <Text style={styles.percentLabel}>লাভ</Text>
+                  <Text style={styles.profitPercent}>{profitPercent}%</Text>
+                </View>
+                <View style={styles.percentRow}>
+                  <Text style={styles.percentLabel}>খরচ</Text>
+                  <Text style={styles.expensePercent}>{expensePercent}%</Text>
+                </View>
+                <View style={styles.percentRow}>
+                  <Text style={styles.percentLabel}>ব্যালেন্স</Text>
+                  <Text
+                    style={[
+                      styles.balancePercent,
+                      balancePercent < 0 && styles.negativeBalancePercent,
+                    ]}
+                  >
+                    {balancePercent}%
+                  </Text>
+                </View>
               </View>
               <View style={styles.summaryBoxes}>
                 <SummaryList
@@ -109,7 +141,6 @@ export default function Today() {
           }}
         />
       )}
-
       {/* <TouchableOpacity
         style={styles.homeButton}
         onPress={() => router.push('/')}
@@ -123,23 +154,61 @@ export default function Today() {
 const styles = StyleSheet.create({
   summaryContainer: { flexDirection: 'row', gap: 12, marginVertical: 12 },
   titleBox: {
-    flex: 1,
+    flex: 1.15,
     justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 16,
     backgroundColor: '#ffffff',
     borderRadius: 22,
     boxShadow: '-2px 5px 20px 1px rgba(27, 27, 29, 0.125)',
   },
+  titleLabel: {
+    color: '#6c7575',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
   summaryTitle: {
-    fontSize: 30,
-    fontWeight: 700,
-    padding: 10,
+    fontSize: 27,
+    fontWeight: '800',
+    marginBottom: 10,
     textAlign: 'center',
     color: '#2F4F4F',
   },
+  percentRow: {
+    alignItems: 'center',
+    borderTopColor: '#E4E9E7',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 7,
+    marginTop: 5,
+  },
+  percentLabel: {
+    color: '#6c7575',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  profitPercent: {
+    color: '#2F4F4F',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  expensePercent: {
+    color: '#a10217',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  balancePercent: {
+    color: '#2F4F4F',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  negativeBalancePercent: {
+    color: '#a10217',
+  },
   summaryBoxes: {
-    flex: 2,
+    flex: 1.85,
   },
 
   itemCard: {

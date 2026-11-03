@@ -16,25 +16,21 @@ export default function Report() {
   const router = useRouter();
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
 
-  const startOfMonth = selectedMonth.startOf('month').toDate();
-  const endOfMonth = selectedMonth.endOf('month').toDate();
-
-  const filterByMonth = (data) =>
-    data.filter((i) => {
-      const d = new Date(i.date);
-      return d >= startOfMonth && d <= endOfMonth;
-    });
-
   /* ================= MONTH DATA ================= */
 
   const monthlyIncomes = useMemo(
-    () => filterByMonth(incomes),
+    () => filterByMonth(incomes, selectedMonth),
     [incomes, selectedMonth],
   );
 
   const monthlyExpenses = useMemo(
-    () => filterByMonth(expenses),
+    () => filterByMonth(expenses, selectedMonth),
     [expenses, selectedMonth],
+  );
+
+  const productStats = useMemo(
+    () => summarizeProducts(monthlyIncomes, selectedMonth),
+    [monthlyIncomes, selectedMonth],
   );
 
   /* ================= TOTALS ================= */
@@ -72,6 +68,9 @@ export default function Report() {
     () => summarize(monthlyExpenses),
     [monthlyExpenses],
   );
+  const expensePercents = expenseData.items.map((item) => item.percent);
+  const minExpensePercent = Math.min(...expensePercents);
+  const maxExpensePercent = Math.max(...expensePercents);
 
   return (
     <ScrollView style={styles.container}>
@@ -112,97 +111,131 @@ export default function Report() {
 
       {/* ================= SUMMARY CARD ================= */}
       <View style={styles.card}>
-        {/* ===== TOTAL SELL (BIG) ===== */}
-        <Text style={styles.totalSellBig}>{totalSell}৳</Text>
-        {/* <Text style={styles.subLabel}>মোট বিক্রি</Text> */}
-
-        {/* ===== TOTAL PROFIT ===== */}
-        <View style={{ marginTop: 16 }}>
-          <View style={styles.rowHeader}>
-            <Text style={styles.profitText}>
-              লাভ --- <Text style={styles.amountText}>{totalProfit}৳</Text>
-            </Text>
-            <Text style={styles.percentText}>{profitPercent}%</Text>
-          </View>
-
-          <View style={styles.progressBg}>
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${profitPercent}%`,
-                  backgroundColor: '#2F4F4F',
-                },
-              ]}
-            />
-          </View>
+        <Text style={styles.sectionTitle}>মাসিক হিসাব</Text>
+        <View style={styles.metricsGrid}>
+          <SummaryMetric
+            label='মোট বিক্রি'
+            amount={totalSell}
+            color='#2F4F4F'
+          />
+          <SummaryMetric
+            label='মোট লাভ'
+            amount={totalProfit}
+            percent={profitPercent}
+            color='#2F4F4F'
+          />
+          <SummaryMetric
+            label='মোট খরচ'
+            amount={totalExpense}
+            percent={expensePercent}
+            color='#3A3A3C'
+          />
+          <SummaryMetric
+            label='মোট ব্যালেন্স'
+            amount={totalBalance}
+            percent={balancePercent}
+            color='#2F4F4F'
+          />
         </View>
+      </View>
 
-        {/* ===== TOTAL EXPENSE ===== */}
-        <View style={{ marginTop: 20 }}>
-          <View style={styles.rowHeader}>
-            <Text style={styles.expenseText}>
-              খরচ --- <Text style={styles.amountText}>{totalExpense}৳</Text>
-            </Text>
-            <Text style={styles.percentText}>{expensePercent}%</Text>
-          </View>
+      {/* ================= PRODUCT DETAILS ================= */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>মাসিক বিক্রি ও লাভের বিস্তারিত</Text>
+        <View style={styles.metricsGrid}>
+          <Metric
+            label='মোট পণ্য বিক্রি'
+            value={`${formatAmount(productStats.count)}টি`}
+          />
+          <Metric
+            label='প্রতিদিন গড় পণ্য'
+            value={`${formatAmount(productStats.averageDailyCount)}টি`}
+          />
+          <Metric
+            label='প্রতি পণ্যের গড় দাম'
+            value={`${formatAmount(productStats.averagePrice)}৳`}
+          />
+          <Metric
+            label='প্রতিদিন গড় বিক্রি'
+            value={`${formatAmount(productStats.averageDailySales)}৳`}
+          />
+          <Metric
+            label='প্রতি পণ্যে গড় লাভ'
+            value={`${formatAmount(productStats.averageProfit)}৳`}
+          />
+          <Metric
+            label='প্রতিদিন গড় লাভ'
+            value={`${formatAmount(productStats.averageDailyProfit)}৳`}
+          />
 
-          <View style={styles.progressBg}>
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${expensePercent}%`,
-                  backgroundColor: '#3A3A3C',
-                },
-              ]}
-            />
-          </View>
-        </View>
-
-        {/* ===== TOTAL BALANCE ===== */}
-        <View style={{ marginTop: 20 }}>
-          <View style={styles.rowHeader}>
-            <Text style={styles.balanceText}>
-              ব্যালেন্স ---{' '}
-              <Text style={styles.amountText}>{totalBalance}৳</Text>
-            </Text>
-            <Text style={styles.percentText}>{balancePercent}%</Text>
-          </View>
-
-          <View style={styles.progressBg}>
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${balancePercent}%`,
-                  backgroundColor: '#2F4F4F',
-                },
-              ]}
-            />
-          </View>
+          <Metric
+            label='সর্বোচ্চ দামের পণ্য'
+            value={
+              productStats.highest
+                ? `${formatAmount(productStats.highest.price)}৳`
+                : '—'
+            }
+          />
+          <Metric
+            label='সর্বোচ্চ লাভের পণ্য '
+            value={
+              productStats.highest
+                ? `${formatAmount(productStats.highest.profit)}৳`
+                : '—'
+            }
+          />
+          <Metric
+            label='সর্বনিম্ন দামের পণ্য'
+            value={
+              productStats.lowest
+                ? `${formatAmount(productStats.lowest.price)}৳`
+                : '—'
+            }
+          />
+          <Metric
+            label='সর্বনিম্ন লাভের পণ্য'
+            value={
+              productStats.lowest
+                ? `${formatAmount(productStats.lowest.profit)}৳`
+                : '—'
+            }
+          />
         </View>
       </View>
 
       {/* ================= EXPENSE DETAILS ================= */}
       <View style={[styles.card, { marginBottom: 100 }]}>
         <Text style={styles.sectionTitle}>খরচের বিস্তারিত</Text>
-
-        {expenseData.items.map((i, idx) => (
-          <HorizontalBar
-            key={idx}
-            name={i.reason}
-            amount={i.amount}
-            percent={i.percent}
-            color={EXPENSE_COLORS[idx % EXPENSE_COLORS.length]}
-          />
-        ))}
+        <View style={styles.metricsGrid}>
+          {expenseData.items.map((item) => (
+            <ExpenseMetric
+              key={item.reason}
+              name={item.reason}
+              amount={item.amount}
+              percent={item.percent}
+              color={getExpenseColor(
+                item.percent,
+                minExpensePercent,
+                maxExpensePercent,
+              )}
+            />
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
 }
 
 /* ================= HELPERS ================= */
+
+function filterByMonth(data, selectedMonth) {
+  const startOfMonth = selectedMonth.startOf('month').toDate();
+  const endOfMonth = selectedMonth.endOf('month').toDate();
+  return data.filter((item) => {
+    const date = new Date(item.date);
+    return date >= startOfMonth && date <= endOfMonth;
+  });
+}
 
 function summarize(data) {
   const map = {};
@@ -223,33 +256,114 @@ function summarize(data) {
   return { total, items };
 }
 
+function summarizeProducts(monthlyIncomes, selectedMonth) {
+  const products = monthlyIncomes
+    .map((income) => ({
+      price: Number(income.selAmount),
+      profit: Number(income.amount || 0),
+    }))
+    .filter(
+      (product) =>
+        Number.isFinite(product.price) &&
+        product.price >= 0 &&
+        Number.isFinite(product.profit),
+    );
+  const count = products.length;
+  const totalSales = products.reduce((sum, product) => sum + product.price, 0);
+  const totalProfit = products.reduce(
+    (sum, product) => sum + product.profit,
+    0,
+  );
+  const today = dayjs();
+  const daysToAverage =
+    selectedMonth.year() === today.year() &&
+    selectedMonth.month() === today.month()
+      ? today.date()
+      : selectedMonth.daysInMonth();
+  const highest = products.reduce(
+    (result, product) =>
+      !result || product.price > result.price ? product : result,
+    null,
+  );
+  const lowest = products.reduce(
+    (result, product) =>
+      !result || product.price < result.price ? product : result,
+    null,
+  );
+
+  return {
+    count,
+    averageDailyCount: daysToAverage ? count / daysToAverage : 0,
+    averagePrice: count ? totalSales / count : 0,
+    averageDailySales: daysToAverage ? totalSales / daysToAverage : 0,
+    averageDailyProfit: daysToAverage ? totalProfit / daysToAverage : 0,
+    averageProfit: count ? totalProfit / count : 0,
+    highest,
+    lowest,
+  };
+}
+
+function formatAmount(value) {
+  return Math.round(Number(value) || 0).toLocaleString('bn-BD');
+}
+
+function getExpenseColor(percent, minPercent, maxPercent) {
+  const low = [220, 38, 38];
+  const high = [127, 29, 29];
+  const range = maxPercent - minPercent;
+  const intensity = range === 0 ? 0.5 : (percent - minPercent) / range;
+  const channels = low.map((channel, index) =>
+    Math.round(channel + (high[index] - channel) * intensity),
+  );
+  return `#${channels
+    .map((channel) => channel.toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
 /* ================= COMPONENT ================= */
 
-function HorizontalBar({ name, amount, percent, color }) {
+function Metric({ label, value }) {
   return (
-    <View style={styles.rowItem}>
-      <View style={styles.rowHeader}>
-        <Text style={styles.reason}>{name}</Text>
-        <Text style={styles.value}>
-          {amount}৳ · {percent}%
-        </Text>
-      </View>
+    <View style={styles.metric}>
+      <Text style={styles.metricValue}>{value}</Text>
+      <Text style={styles.metricLabel}>{label}</Text>
+    </View>
+  );
+}
 
-      <View style={styles.progressBg}>
-        <View
-          style={[
-            styles.progressFill,
-            { width: `${percent}%`, backgroundColor: color },
-          ]}
-        />
+function SummaryMetric({ label, amount, percent, color }) {
+  return (
+    <View style={styles.summaryMetric}>
+      <Text style={[styles.summaryAmount, { color }]}>
+        {formatAmount(amount)}৳
+      </Text>
+      <View style={styles.rowHeader}>
+        <Text style={styles.metricLabel}>{label}</Text>
+        {percent !== undefined ? (
+          <Text style={[styles.summaryPercent, { color }]}>{percent}%</Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+function ExpenseMetric({ name, amount, percent, color }) {
+  return (
+    <View style={[styles.expenseMetric, { borderColor: color }]}>
+      <Text style={[styles.summaryAmount, { color }]}>
+        {formatAmount(amount)}৳
+      </Text>
+      <View style={styles.rowHeader}>
+        <Text style={styles.metricLabel} numberOfLines={1}>
+          {name}
+        </Text>
+        <Text style={[styles.summaryPercent, { color }]}>{percent}%</Text>
       </View>
     </View>
   );
 }
 
 /* ================= COLORS ================= */
-
-const EXPENSE_COLORS = ['#2F4F4F', '#3A3A3C', '#1B1B1D', '#b2b3b3', '#707070'];
 
 /* ================= STYLES ================= */
 
@@ -290,70 +404,143 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     boxShadow: '-2px 5px 20px 1px rgba(27, 27, 29, 0.125)',
   },
-  totalSellBig: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#2F4F4F',
-    textAlign: 'center',
-    marginTop: 6,
-  },
-
-  amountText: {
-    fontWeight: '700',
-    marginTop: 6,
-  },
-
-  percentText: {
-    fontWeight: '700',
-  },
-
-  profitText: {
-    fontWeight: '700',
-    color: '#2F4F4F',
-  },
-
-  expenseText: {
-    fontWeight: '700',
-    color: '#8e0202',
-  },
-
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 12,
     textAlign: 'center',
   },
-
-  sellText: {
-    fontWeight: '700',
+  productRevenue: {
     color: '#2F4F4F',
-    marginBottom: 4,
-  },
-
-  percentLabel: {
+    fontSize: 15,
     fontWeight: '700',
-    marginBottom: 6,
+    marginBottom: 12,
+    textAlign: 'center',
   },
-
-  rowItem: {
-    marginBottom: 14,
+  detailSectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    marginTop: 2,
+  },
+  detailSectionTitle: {
+    color: '#2F4F4F',
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  detailDivider: {
+    backgroundColor: '#E4E9E7',
+    height: 1,
+    marginBottom: 12,
+    marginTop: 2,
+  },
+  metricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  metric: {
+    width: '48%',
+    minHeight: 76,
+    justifyContent: 'center',
+    backgroundColor: '#F3F6F5',
+    borderRadius: 12,
+    marginBottom: 10,
+    padding: 10,
+  },
+  metricValue: {
+    color: '#2F4F4F',
+    fontSize: 17,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  metricLabel: {
+    color: '#3A3A3C',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  summaryMetric: {
+    width: '48%',
+    minHeight: 96,
+    justifyContent: 'space-between',
+    backgroundColor: '#F3F6F5',
+    borderRadius: 12,
+    marginBottom: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E4E9E7',
+  },
+  summaryAmount: {
+    fontSize: 21,
+    fontWeight: '800',
+    textAlign: 'left',
+    marginBottom: 12,
+  },
+  summaryPercent: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  expenseMetric: {
+    width: '48%',
+    minHeight: 96,
+    justifyContent: 'space-between',
+    backgroundColor: '#FFF7F7',
+    borderRadius: 12,
+    marginBottom: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#DC2626',
+  },
+  productPriceRow: {
+    borderTopColor: '#E4E9E7',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    marginTop: 2,
+    paddingTop: 12,
+  },
+  productPriceItem: {
+    flex: 1,
+    paddingHorizontal: 6,
+  },
+  productPriceLabel: {
+    color: '#707070',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  productPrice: {
+    color: '#2F4F4F',
+    fontSize: 15,
+    fontWeight: '800',
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  bestSeller: {
+    color: '#2F4F4F',
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  noteText: {
+    color: '#707070',
+    fontSize: 11,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  emptyText: {
+    color: '#8e0202',
+    textAlign: 'center',
   },
 
   rowHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-
-  reason: {
-    fontWeight: '600',
-    color: '#3A3A3C',
-  },
-
-  value: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#3A3A3C',
+    marginTop: 6,
   },
 
   progressBg: {
@@ -366,9 +553,5 @@ const styles = StyleSheet.create({
   progressFill: {
     height: '100%',
     borderRadius: 10,
-  },
-  balanceText: {
-    fontWeight: '700',
-    color: '#2F4F4F',
   },
 });

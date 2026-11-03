@@ -57,3 +57,10 @@ PDF sharing/printing. Shop details are saved once and added to new memos
 automatically. PDF export supports A4 and 58mm/80mm thermal receipt layouts;
 select the matching paper width in the printer app when printing a thermal memo.
 Cash memos and shop details are included in app backups.
+
+## Product catalog
+
+Manage an independent optical shop product list from the home screen. Products
+can be grouped by category and store a name, optional photo, price, and optional
+SKU/code, plus a stock quantity. The catalog is not connected to cash memos or
+income entries yet.

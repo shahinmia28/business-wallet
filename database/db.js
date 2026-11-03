@@ -56,6 +56,16 @@ export const {
   getShopProfile,
   saveShopProfile,
 
+  // Product catalog
+  getProductCategories,
+  insertProductCategory,
+  updateProductCategory,
+  deleteProductCategory,
+  getAllProducts,
+  insertProduct,
+  updateProduct,
+  deleteProduct,
+
   // Customers
   getAllCustomers,
   getAllCustomersIncludingInactive,

@@ -69,6 +69,16 @@ export const deleteMemoById = notSupported('deleteMemoById');
 export const getShopProfile = async () => null;
 export const saveShopProfile = notSupported('saveShopProfile');
 
+// Product catalog
+export const getProductCategories = async () => [];
+export const insertProductCategory = notSupported('insertProductCategory');
+export const updateProductCategory = notSupported('updateProductCategory');
+export const deleteProductCategory = notSupported('deleteProductCategory');
+export const getAllProducts = async () => [];
+export const insertProduct = notSupported('insertProduct');
+export const updateProduct = notSupported('updateProduct');
+export const deleteProduct = notSupported('deleteProduct');
+
 /* ===== CUSTOMERS ===== */
 export const getAllCustomers = async () => [];
 export const getAllCustomersIncludingInactive = async () => [];

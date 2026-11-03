@@ -233,6 +233,42 @@ export const initDB = async () => {
       name: 'add_cash_memo_shop_description_column',
       query: `ALTER TABLE cash_memos ADD COLUMN shopDescription TEXT NOT NULL DEFAULT '';`,
     },
+    {
+      name: 'create_product_catalog_tables',
+      query: `
+        CREATE TABLE IF NOT EXISTS product_categories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+          createdAt TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS products (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          categoryId INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          imagePath TEXT,
+          price REAL NOT NULL DEFAULT 0,
+          code TEXT NOT NULL DEFAULT '',
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL,
+          FOREIGN KEY (categoryId)
+            REFERENCES product_categories(id)
+            ON DELETE RESTRICT
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_products_code_unique
+        ON products(code COLLATE NOCASE)
+        WHERE TRIM(code) <> '';
+        CREATE INDEX IF NOT EXISTS idx_products_category_name
+        ON products(categoryId, name COLLATE NOCASE);
+      `,
+    },
+    {
+      name: 'add_products_quantity_column',
+      query: `ALTER TABLE products ADD COLUMN quantity INTEGER NOT NULL DEFAULT 0;`,
+    },
+    {
+      name: 'add_product_categories_icon_column',
+      query: `ALTER TABLE product_categories ADD COLUMN icon TEXT NOT NULL DEFAULT 'glasses';`,
+    },
   ];
 
   // 3️⃣ Run migrations that are not applied
@@ -761,6 +797,89 @@ export const updateMemo = async ({
 
 export const deleteMemoById = async (id) =>
   db.runAsync('DELETE FROM cash_memos WHERE id=?;', [id]);
+
+/* ===================== PRODUCT CATALOG ===================== */
+export const getProductCategories = async () =>
+  db.getAllAsync(
+    'SELECT * FROM product_categories ORDER BY name COLLATE NOCASE;',
+  );
+
+export const insertProductCategory = async (name, icon = 'glasses') =>
+  db.runAsync(
+    'INSERT INTO product_categories (name, icon, createdAt) VALUES (?, ?, ?);',
+    [name.trim(), icon, currentTimestamp()],
+  );
+
+export const updateProductCategory = async ({ id, name, icon }) =>
+  db.runAsync(
+    'UPDATE product_categories SET name=?, icon=? WHERE id=?;',
+    [name.trim(), icon, Number(id)],
+  );
+
+export const deleteProductCategory = async (id) =>
+  db.runAsync('DELETE FROM product_categories WHERE id=?;', [Number(id)]);
+
+export const getAllProducts = async () =>
+  db.getAllAsync(`
+    SELECT products.*, product_categories.name AS categoryName
+    FROM products
+    INNER JOIN product_categories ON product_categories.id = products.categoryId
+    ORDER BY product_categories.name COLLATE NOCASE, products.name COLLATE NOCASE;
+  `);
+
+export const insertProduct = async ({
+  categoryId,
+  name,
+  imagePath = null,
+  price,
+  quantity = 0,
+  code = '',
+}) => {
+  const timestamp = currentTimestamp();
+  return db.runAsync(
+    `INSERT INTO products
+      (categoryId, name, imagePath, price, quantity, code, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+    [
+      Number(categoryId),
+      name.trim(),
+      imagePath,
+      Number(price),
+      Number(quantity),
+      code.trim(),
+      timestamp,
+      timestamp,
+    ],
+  );
+};
+
+export const updateProduct = async ({
+  id,
+  categoryId,
+  name,
+  imagePath = null,
+  price,
+  quantity = 0,
+  code = '',
+}) =>
+  db.runAsync(
+    `UPDATE products
+     SET categoryId=?, name=?, imagePath=?, price=?, quantity=?, code=?, updatedAt=?
+     WHERE id=?;`,
+    [
+      Number(categoryId),
+      name.trim(),
+      imagePath,
+      Number(price),
+      Number(quantity),
+      code.trim(),
+      currentTimestamp(),
+      Number(id),
+    ],
+  );
+
+export const deleteProduct = async (id) =>
+  db.runAsync('DELETE FROM products WHERE id=?;', [Number(id)]);
 
 export const getShopProfile = async () =>
   db.getFirstAsync('SELECT * FROM memo_shop_profile WHERE id=1;');
